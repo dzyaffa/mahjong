@@ -134,7 +134,7 @@
   /* ===== LAYAR UMUM ===== */
   .screen { display: none; }
   .screen.active { display: block; }
-  #screen-title.active { display: flex; }
+  #screen-title.active { display: flex !important; }
 
   /* ===== TUTORIAL ===== */
   #screen-tutorial {
@@ -249,7 +249,7 @@
     flex-direction: column;
     padding: 10px;
   }
-  #screen-game.active { display: flex; }
+  #screen-game.active { display: flex !important; }
   .game-header {
     display: flex;
     justify-content: space-between;
@@ -975,7 +975,7 @@ function buildDeck() {
   for (let s = 0; s < 3; s++) {
     for (let n = 1; n <= 9; n++) {
       for (let c = 0; c < 4; c++) {
-        deck.push({ suit: SUITS[s], num: n, sym: SUIT_SYMS[SUITS[s]][n-1], cls: SUITS[s] === 'wan' ? 'mwan' : SUITS[s] });
+        deck.push({ suit: SUITS[s], num: n, sym: SUIT_SYMS[SUITS[s]][n-1], cls: SUITS[s] === 'wan' ? 'mwan' : SUITS[s] === 'bambu' ? 'bamboo' : 'circle' });
       }
     }
   }
@@ -1436,8 +1436,15 @@ function showFloatNotif(msg, duration = 2000) {
 // SCREEN & MODAL MANAGEMENT
 // =============================================
 function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.style.display = '';
+  });
+  const el = document.getElementById('screen-' + name);
+  el.classList.add('active');
+  if (name === 'game') el.style.display = 'flex';
+  else if (name === 'title') el.style.display = 'flex';
+  else el.style.display = 'block';
 }
 
 function showModal(id) {
