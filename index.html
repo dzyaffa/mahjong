@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mahjong Simulator — 麻将</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel+Decorative:wght@400;700&family=Noto+Sans:wght@300;400;600&display=swap');
+
+  :root {
+    --green: #1a4a2e;
+    --green-light: #2d6b45;
+    --green-felt: #1e5c38;
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --ivory: #fdf6e3;
+    --ivory-dark: #e8d5a0;
+    --red: #c0392b;
+    --red-bright: #e74c3c;
+    --dark: #0d1f15;
+    --tile-bg: #fdf6e3;
+    --tile-border: #c9a84c;
+    --shadow: rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    font-family: 'Noto Sans', sans-serif;
+    color: var(--ivory);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== LAYAR JUDUL ===== */
+  #screen-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: radial-gradient(ellipse at center, #1a4a2e 0%, #0d1f15 70%);
+    position: relative;
+    overflow: hidden;
+  }
+  #screen-title::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+  .title-main {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(2rem, 6vw, 4rem);
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(201,168,76,0.5), 0 2px 4px rgba(0,0,0,0.8);
+    letter-spacing: 4px;
+    animation: glow 3s ease-in-out infinite alternate;
+  }
+  .title-chinese {
+    font-family: 'Noto Serif SC', serif;
+    font-size: clamp(3rem, 10vw, 6rem);
+    color: var(--gold-light);
+    text-shadow: 0 0 40px rgba(201,168,76,0.6);
+    margin: 10px 0;
+  }
+  .title-sub {
+    font-family: 'Noto Sans', sans-serif;
+    color: var(--ivory-dark);
+    letter-spacing: 6px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    margin-bottom: 50px;
+  }
+  @keyframes glow {
+    from { text-shadow: 0 0 20px rgba(201,168,76,0.3); }
+    to { text-shadow: 0 0 50px rgba(201,168,76,0.8), 0 0 80px rgba(201,168,76,0.3); }
+  }
+  .btn-gold {
+    background: linear-gradient(135deg, #c9a84c, #f0d080, #c9a84c);
+    color: #1a0a00;
+    border: none;
+    padding: 14px 40px;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    letter-spacing: 2px;
+    margin: 8px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(201,168,76,0.4);
+    font-weight: 700;
+  }
+  .btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(201,168,76,0.6);
+    background: linear-gradient(135deg, #f0d080, #fff5b0, #f0d080);
+  }
+  .btn-green {
+    background: linear-gradient(135deg, #1a4a2e, #2d6b45);
+    color: var(--gold);
+    border: 2px solid var(--gold);
+    padding: 12px 36px;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    margin: 8px;
+    transition: all 0.3s;
+  }
+  .btn-green:hover {
+    background: var(--green-light);
+    box-shadow: 0 4px 15px rgba(201,168,76,0.3);
+  }
+  .btn-red {
+    background: linear-gradient(135deg, #8b0000, #c0392b);
+    color: white;
+    border: 2px solid #e74c3c;
+    padding: 10px 28px;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 4px;
+    margin: 5px;
+    transition: all 0.3s;
+  }
+  .btn-red:hover { background: #c0392b; box-shadow: 0 4px 15px rgba(231,76,60,0.4); }
+
+  /* ===== LAYAR UMUM ===== */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ===== TUTORIAL ===== */
+  #screen-tutorial {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #0d1f15 0%, #0a1a10 100%);
+    padding: 20px;
+  }
+  .tutorial-header {
+    text-align: center;
+    padding: 30px 0 20px;
+    border-bottom: 2px solid rgba(201,168,76,0.3);
+    margin-bottom: 30px;
+  }
+  .tutorial-header h1 {
+    font-family: 'Cinzel Decorative', serif;
+    color: var(--gold);
+    font-size: 1.8rem;
+    letter-spacing: 3px;
+  }
+  .tut-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 30px;
+  }
+  .tut-tab {
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--ivory-dark);
+    padding: 8px 18px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  .tut-tab.active, .tut-tab:hover {
+    background: rgba(201,168,76,0.25);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .tut-content { display: none; max-width: 900px; margin: 0 auto; }
+  .tut-content.active { display: block; }
+  .tut-section {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .tut-section h2 {
+    font-family: 'Noto Serif SC', serif;
+    color: var(--gold);
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+  .tut-section p { color: #c5d5c5; line-height: 1.8; margin-bottom: 10px; font-size: 0.95rem; }
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 10px;
+    margin: 15px 0;
+  }
+  .tile-demo {
+    background: var(--tile-bg);
+    border: 2px solid var(--tile-border);
+    border-radius: 6px;
+    padding: 6px 4px;
+    text-align: center;
+    cursor: default;
+    box-shadow: 2px 3px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.8);
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s;
+  }
+  .tile-demo:hover { transform: translateY(-3px); }
+  .tile-demo .t-sym { font-size: 1.5rem; line-height: 1; }
+  .tile-demo .t-label { font-size: 0.6rem; color: #444; margin-top: 3px; font-family: 'Noto Sans', sans-serif; }
+  .tile-demo.bamboo .t-sym { color: #1a6a2e; }
+  .tile-demo.circle .t-sym { color: #1a3a8a; }
+  .tile-demo.mwan .t-sym { font-family: 'Noto Serif SC', serif; color: #8a0000; font-size: 1.3rem; }
+  .tile-demo.wind .t-sym { font-family: 'Noto Serif SC', serif; color: #1a1a6a; font-size: 1.3rem; }
+  .tile-demo.dragon .t-sym { font-family: 'Noto Serif SC', serif; font-size: 1.3rem; }
+  .tile-demo.dragon.chun .t-sym { color: #c0392b; }
+  .tile-demo.dragon.haku .t-sym { color: #888; }
+  .tile-demo.dragon.hatsu .t-sym { color: #1a6a2e; }
+  .combo-box {
+    background: rgba(201,168,76,0.08);
+    border-left: 3px solid var(--gold);
+    padding: 12px 16px;
+    margin: 10px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .combo-box h3 { color: var(--gold-light); font-size: 1rem; margin-bottom: 6px; }
+  .combo-box p { color: #b0c5b0; font-size: 0.88rem; margin: 0; }
+  .highlight { color: var(--gold-light); font-weight: 600; }
+  .score-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+  .score-table th { background: rgba(201,168,76,0.2); color: var(--gold); padding: 10px; text-align: left; font-size: 0.9rem; }
+  .score-table td { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #c5d5c5; font-size: 0.88rem; }
+  .score-table tr:hover td { background: rgba(255,255,255,0.03); }
+
+  /* ===== PAPAN PERMAINAN ===== */
+  #screen-game {
+    min-height: 100vh;
+    background: radial-gradient(ellipse at center, #1e5c38 0%, #0d2e1a 100%);
+    display: none;
+    flex-direction: column;
+    padding: 10px;
+  }
+  #screen-game.active { display: flex; }
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 15px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .game-title { font-family: 'Cinzel Decorative', serif; color: var(--gold); font-size: 1rem; }
+  .game-info { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+  .info-box {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 5px;
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    color: var(--ivory-dark);
+    text-align: center;
+  }
+  .info-box span { display: block; color: var(--gold); font-weight: 600; font-size: 1rem; }
+
+  /* Papan utama */
+  .game-board {
+    flex: 1;
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    gap: 8px;
+  }
+  .player-area {
+    background: rgba(0,0,0,0.25);
+    border-radius: 8px;
+    padding: 8px 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .player-label {
+    font-size: 0.75rem;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .player-label .score-badge {
+    background: rgba(201,168,76,0.2);
+    border: 1px solid var(--gold);
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    color: var(--gold-light);
+  }
+
+  /* Tangan lawan (tersembunyi) */
+  .opponent-hand {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .tile-back {
+    width: 30px;
+    height: 42px;
+    background: linear-gradient(135deg, #1a4a8a, #0d2a5c);
+    border: 2px solid #4a7ac9;
+    border-radius: 4px;
+    box-shadow: 1px 2px 4px rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+  }
+
+  /* Area tengah */
+  .middle-area {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 8px;
+    align-items: start;
+  }
+  .discard-pile {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 8px;
+    padding: 10px;
+    min-height: 150px;
+  }
+  .discard-pile h4 {
+    text-align: center;
+    color: rgba(201,168,76,0.6);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .discard-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    justify-content: center;
+  }
+
+  /* Tile kecil di discard */
+  .tile-sm {
+    width: 28px;
+    height: 38px;
+    background: var(--tile-bg);
+    border: 1.5px solid var(--tile-border);
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    box-shadow: 1px 2px 3px rgba(0,0,0,0.4);
+    cursor: default;
+    position: relative;
+  }
+  .tile-sm.bamboo { color: #1a6a2e; }
+  .tile-sm.circle { color: #1a3a8a; }
+  .tile-sm.mwan { font-family: 'Noto Serif SC', serif; color: #8a0000; font-size: 0.75rem; }
+  .tile-sm.wind { font-family: 'Noto Serif SC', serif; color: #1a1a6a; font-size: 0.75rem; }
+  .tile-sm.dragon-chun { font-family: 'Noto Serif SC', serif; color: #c0392b; font-size: 0.75rem; }
+  .tile-sm.dragon-haku { font-family: 'Noto Serif SC', serif; color: #666; font-size: 0.75rem; }
+  .tile-sm.dragon-hatsu { font-family: 'Noto Serif SC', serif; color: #1a6a2e; font-size: 0.75rem; }
+  .tile-sm.latest { box-shadow: 0 0 8px rgba(255,215,0,0.8), 1px 2px 3px rgba(0,0,0,0.4); border-color: gold; }
+
+  /* Info tengah */
+  .center-info {
+    background: rgba(0,0,0,0.3);
+    border: 2px solid rgba(201,168,76,0.3);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 150px;
+  }
+  .wind-indicator {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 2.5rem;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(201,168,76,0.5);
+  }
+  .round-info { font-size: 0.75rem; color: var(--ivory-dark); letter-spacing: 1px; }
+  .wall-count {
+    background: rgba(201,168,76,0.15);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 15px;
+    padding: 4px 14px;
+    font-size: 0.8rem;
+    color: var(--gold-light);
+  }
+  .drawn-tile-display {
+    background: rgba(255,255,255,0.05);
+    border: 1px dashed rgba(201,168,76,0.4);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 0.75rem;
+    color: var(--ivory-dark);
+    min-width: 80px;
+  }
+
+  /* Tangan pemain */
+  .player-hand {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 5px 0;
+  }
+
+  /* Tile utama pemain */
+  .tile-main {
+    width: 48px;
+    height: 65px;
+    background: linear-gradient(180deg, #fffef8 0%, #fdf6e3 100%);
+    border: 2px solid var(--tile-border);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 2px 4px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.9);
+    transition: all 0.15s ease;
+    position: relative;
+    user-select: none;
+  }
+  .tile-main:hover { transform: translateY(-8px); box-shadow: 2px 10px 20px rgba(0,0,0,0.6); }
+  .tile-main.selected {
+    transform: translateY(-12px);
+    border-color: #e74c3c;
+    box-shadow: 0 0 12px rgba(231,76,60,0.7), 2px 12px 20px rgba(0,0,0,0.6);
+  }
+  .tile-main.new-tile {
+    animation: newTilePop 0.4s ease;
+    border-color: #27ae60;
+    box-shadow: 0 0 12px rgba(39,174,96,0.6), 2px 4px 8px rgba(0,0,0,0.5);
+  }
+  @keyframes newTilePop {
+    0% { transform: translateY(-30px) scale(0.8); opacity: 0; }
+    60% { transform: translateY(5px) scale(1.05); }
+    100% { transform: translateY(0) scale(1); }
+  }
+  .tile-main .t-sym { font-size: 1.7rem; line-height: 1; }
+  .tile-main .t-num { font-size: 0.7rem; position: absolute; top: 2px; left: 4px; font-weight: 700; }
+  .tile-main.bamboo .t-sym { color: #1a6a2e; }
+  .tile-main.bamboo .t-num { color: #1a6a2e; }
+  .tile-main.circle .t-sym { color: #1a3a8a; }
+  .tile-main.circle .t-num { color: #1a3a8a; }
+  .tile-main.mwan .t-sym { font-family: 'Noto Serif SC', serif; color: #8a0000; font-size: 1.3rem; }
+  .tile-main.mwan .t-num { color: #8a0000; }
+  .tile-main.wind .t-sym { font-family: 'Noto Serif SC', serif; color: #1a1a6a; font-size: 1.3rem; }
+  .tile-main.dragon-chun .t-sym { font-family: 'Noto Serif SC', serif; color: #c0392b; font-size: 1.3rem; }
+  .tile-main.dragon-haku .t-sym { font-family: 'Noto Serif SC', serif; color: #888; font-size: 1.3rem; }
+  .tile-main.dragon-hatsu .t-sym { font-family: 'Noto Serif SC', serif; color: #1a6a2e; font-size: 1.3rem; }
+
+  /* Meld area */
+  .meld-area {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .meld-set {
+    display: flex;
+    gap: 2px;
+    background: rgba(0,0,0,0.2);
+    padding: 3px;
+    border-radius: 4px;
+    border: 1px solid rgba(201,168,76,0.2);
+  }
+
+  /* Action buttons */
+  .action-bar {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 8px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 8px;
+  }
+  .action-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .action-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
+  .btn-discard { background: linear-gradient(135deg, #8b0000, #c0392b); color: white; }
+  .btn-discard:hover:not(:disabled) { background: linear-gradient(135deg, #c0392b, #e74c3c); transform: translateY(-2px); }
+  .btn-chi { background: linear-gradient(135deg, #1a4a8a, #2980b9); color: white; }
+  .btn-chi:hover:not(:disabled) { transform: translateY(-2px); }
+  .btn-pon { background: linear-gradient(135deg, #6a1a8a, #8e44ad); color: white; }
+  .btn-pon:hover:not(:disabled) { transform: translateY(-2px); }
+  .btn-kan { background: linear-gradient(135deg, #5a4a0a, #d4ac0d); color: #1a0a00; }
+  .btn-kan:hover:not(:disabled) { transform: translateY(-2px); }
+  .btn-win { background: linear-gradient(135deg, #1a6a2e, #27ae60); color: white; animation: pulseGreen 1.5s ease-in-out infinite; }
+  @keyframes pulseGreen {
+    0%,100% { box-shadow: 0 0 8px rgba(39,174,96,0.5); }
+    50% { box-shadow: 0 0 20px rgba(39,174,96,0.9); }
+  }
+  .btn-draw { background: linear-gradient(135deg, #5a3a0a, #c0842b); color: white; }
+  .btn-draw:hover:not(:disabled) { transform: translateY(-2px); }
+
+  /* Log messages */
+  .game-log {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    color: #a0b5a0;
+    max-height: 60px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+  .log-entry { padding: 1px 0; }
+  .log-entry.important { color: var(--gold-light); font-weight: 600; }
+  .log-entry.win { color: #2ecc71; font-weight: 700; font-size: 0.9rem; }
+  .log-entry.error { color: #e74c3c; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-box {
+    background: linear-gradient(135deg, #0d2e1a, #1a4a2e);
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    padding: 30px 40px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 0 50px rgba(201,168,76,0.3);
+  }
+  .modal-box h2 { font-family: 'Cinzel Decorative', serif; color: var(--gold); margin-bottom: 15px; font-size: 1.5rem; }
+  .modal-box p { color: var(--ivory-dark); margin-bottom: 20px; line-height: 1.7; }
+  .win-score { font-size: 3rem; color: var(--gold); font-family: 'Cinzel Decorative', serif; margin: 10px 0; text-shadow: 0 0 20px rgba(201,168,76,0.5); }
+  .win-hands { color: #90c090; font-size: 0.9rem; margin-bottom: 20px; }
+
+  /* Notif floating */
+  .floating-notif {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(201,168,76,0.95);
+    color: #1a0a00;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 1rem;
+    z-index: 999;
+    display: none;
+    animation: slideDown 0.3s ease;
+  }
+  @keyframes slideDown {
+    from { top: -40px; opacity: 0; }
+    to { top: 20px; opacity: 1; }
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .tile-main { width: 38px; height: 52px; }
+    .tile-main .t-sym { font-size: 1.3rem; }
+    .middle-area { grid-template-columns: 1fr; }
+    .tile-grid { grid-template-columns: repeat(auto-fill, minmax(55px, 1fr)); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Floating notification -->
+<div class="floating-notif" id="floatNotif"></div>
+
+<!-- ===== LAYAR JUDUL ===== -->
+<div id="screen-title" class="screen active">
+  <div class="title-main">MAHJONG</div>
+  <div class="title-chinese">麻将</div>
+  <div class="title-sub">Simulator Lengkap · Bahasa Indonesia</div>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;">
+    <button class="btn-gold" onclick="showScreen('game'); startGame()">⚡ MULAI BERMAIN</button>
+    <button class="btn-green" onclick="showScreen('tutorial')">📖 TUTORIAL</button>
+  </div>
+</div>
+
+<!-- ===== LAYAR TUTORIAL ===== -->
+<div id="screen-tutorial" class="screen">
+  <div class="tutorial-header">
+    <h1>📖 Tutorial Mahjong</h1>
+    <p style="color:#a0b5a0;font-size:0.9rem;margin-top:8px;">Pelajari semua yang perlu kamu tahu tentang permainan ini</p>
+  </div>
+  <div class="tut-tabs">
+    <div class="tut-tab active" onclick="showTutTab('pengenalan')">🀄 Pengenalan</div>
+    <div class="tut-tab" onclick="showTutTab('tile-suit')">🎴 Tile Suit</div>
+    <div class="tut-tab" onclick="showTutTab('tile-spesial')">✨ Tile Spesial</div>
+    <div class="tut-tab" onclick="showTutTab('kombinasi')">🃏 Kombinasi</div>
+    <div class="tut-tab" onclick="showTutTab('cara-main')">🎮 Cara Main</div>
+    <div class="tut-tab" onclick="showTutTab('skor')">🏆 Skor & Menang</div>
+  </div>
+
+  <!-- TAB: Pengenalan -->
+  <div id="tut-pengenalan" class="tut-content active">
+    <div class="tut-section">
+      <h2>🀄 Apa itu Mahjong?</h2>
+      <p>Mahjong (麻将) adalah permainan papan asal Tiongkok yang dimainkan oleh <span class="highlight">4 pemain</span>. Permainan ini menggunakan set tile khusus dan menggabungkan strategi, keberuntungan, dan keterampilan menghitung.</p>
+      <p>Tujuan permainan: <span class="highlight">kumpulkan 14 tile</span> yang membentuk kombinasi menang — biasanya terdiri dari 4 set (triplet/urutan) + 1 pasang.</p>
+      <p>Set lengkap Mahjong terdiri dari <span class="highlight">136 tile</span> (144 dengan tile bunga). Setiap pemain mendapat <span class="highlight">13 tile</span> awal.</p>
+    </div>
+    <div class="tut-section">
+      <h2>🌬️ Angin & Putaran</h2>
+      <p>Permainan dibagi dalam <span class="highlight">4 putaran</span> (Timur, Selatan, Barat, Utara). Setiap pemain mendapat giliran sebagai <span class="highlight">Dealer (Bankir)</span>.</p>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:15px 0;">
+        <div class="tile-demo wind"><div class="t-sym">東</div><div class="t-label">Timur 東</div></div>
+        <div class="tile-demo wind"><div class="t-sym">南</div><div class="t-label">Selatan 南</div></div>
+        <div class="tile-demo wind"><div class="t-sym">西</div><div class="t-label">Barat 西</div></div>
+        <div class="tile-demo wind"><div class="t-sym">北</div><div class="t-label">Utara 北</div></div>
+      </div>
+      <p>Dealer memulai permainan dan membuang tile pertama. Giliran berputar <span class="highlight">berlawanan arah jarum jam</span>.</p>
+    </div>
+  </div>
+
+  <!-- TAB: Tile Suit -->
+  <div id="tut-tile-suit" class="tut-content">
+    <div class="tut-section">
+      <h2>🎋 Bambu (Bamboo / 竹)</h2>
+      <p>Ada <span class="highlight">9 tile bambu</span> bernomor 1–9. Tile Bambu 1 digambarkan sebagai burung (biasanya Burung Merak). Tile 2–9 digambarkan sebagai batang bambu.</p>
+      <div class="tile-grid">
+        <div class="tile-demo bamboo"><div class="t-sym">🎋</div><div class="t-label">1 Bambu</div></div>
+        <div class="tile-demo bamboo"><div class="t-sym">🀐</div><div class="t-label">2 Bambu</div></div>
+        <div class="tile-demo bamboo"><div class="t-sym">🀑</div><div class="t-label">3 Bambu</div></div>
+        <div class="tile-demo bamboo"><div class="t-sym">🀒</div><div class="t-label">4 Bambu</div></div>
+        <div class="tile-demo bamboo"><div class="t-sym">🀓</div><div class="t-label">5 Bambu</div></div>
+        <div class="tile-demo bamboo"><div class="t-sym">🀔</div><div class="t-label">6 Bambu</div></div>
+        <div class="tile-demo bamboo"><div class="t-sym">🀕</div><div class="t-label">7 Bambu</div></div>
+        <div class="tile-demo bamboo"><div class="t-sym">🀖</div><div class="t-label">8 Bambu</div></div>
+        <div class="tile-demo bamboo"><div class="t-sym">🀗</div><div class="t-label">9 Bambu</div></div>
+      </div>
+      <p>Dalam set lengkap ada <span class="highlight">4 salinan</span> tiap tile (total 36 tile bambu).</p>
+    </div>
+    <div class="tut-section">
+      <h2>🔵 Lingkaran (Circle / 筒)</h2>
+      <p>Ada <span class="highlight">9 tile lingkaran</span> bernomor 1–9, digambarkan sebagai koin/lingkaran.</p>
+      <div class="tile-grid">
+        <div class="tile-demo circle"><div class="t-sym">🀙</div><div class="t-label">1 Lingkaran</div></div>
+        <div class="tile-demo circle"><div class="t-sym">🀚</div><div class="t-label">2 Lingkaran</div></div>
+        <div class="tile-demo circle"><div class="t-sym">🀛</div><div class="t-label">3 Lingkaran</div></div>
+        <div class="tile-demo circle"><div class="t-sym">🀜</div><div class="t-label">4 Lingkaran</div></div>
+        <div class="tile-demo circle"><div class="t-sym">🀝</div><div class="t-label">5 Lingkaran</div></div>
+        <div class="tile-demo circle"><div class="t-sym">🀞</div><div class="t-label">6 Lingkaran</div></div>
+        <div class="tile-demo circle"><div class="t-sym">🀟</div><div class="t-label">7 Lingkaran</div></div>
+        <div class="tile-demo circle"><div class="t-sym">🀠</div><div class="t-label">8 Lingkaran</div></div>
+        <div class="tile-demo circle"><div class="t-sym">🀡</div><div class="t-label">9 Lingkaran</div></div>
+      </div>
+    </div>
+    <div class="tut-section">
+      <h2>🈵 Karakter/Wan (Man / 万子)</h2>
+      <p>Ada <span class="highlight">9 tile karakter</span> bernomor 1–9. Ditandai dengan karakter Cina untuk angka plus karakter 萬 (sepuluh ribu).</p>
+      <div class="tile-grid">
+        <div class="tile-demo mwan"><div class="t-sym">一萬</div><div class="t-label">1 Wan</div></div>
+        <div class="tile-demo mwan"><div class="t-sym">二萬</div><div class="t-label">2 Wan</div></div>
+        <div class="tile-demo mwan"><div class="t-sym">三萬</div><div class="t-label">3 Wan</div></div>
+        <div class="tile-demo mwan"><div class="t-sym">四萬</div><div class="t-label">4 Wan</div></div>
+        <div class="tile-demo mwan"><div class="t-sym">五萬</div><div class="t-label">5 Wan</div></div>
+        <div class="tile-demo mwan"><div class="t-sym">六萬</div><div class="t-label">6 Wan</div></div>
+        <div class="tile-demo mwan"><div class="t-sym">七萬</div><div class="t-label">7 Wan</div></div>
+        <div class="tile-demo mwan"><div class="t-sym">八萬</div><div class="t-label">8 Wan</div></div>
+        <div class="tile-demo mwan"><div class="t-sym">九萬</div><div class="t-label">9 Wan</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: Tile Spesial -->
+  <div id="tut-tile-spesial" class="tut-content">
+    <div class="tut-section">
+      <h2>🌬️ Tile Angin (Wind Tiles / 風牌)</h2>
+      <p>Ada <span class="highlight">4 tile angin</span>, masing-masing ada 4 salinan (total 16 tile). Tile angin menambah bonus skor bila sesuai dengan angin ronde atau angin pemain.</p>
+      <div class="tile-grid" style="max-width:350px;">
+        <div class="tile-demo wind"><div class="t-sym">東</div><div class="t-label">Timur (Ton)</div></div>
+        <div class="tile-demo wind"><div class="t-sym">南</div><div class="t-label">Selatan (Nan)</div></div>
+        <div class="tile-demo wind"><div class="t-sym">西</div><div class="t-label">Barat (Sha)</div></div>
+        <div class="tile-demo wind"><div class="t-sym">北</div><div class="t-label">Utara (Pei)</div></div>
+      </div>
+      <p>Triplet angin yang cocok dengan <span class="highlight">angin putaran saat ini</span> memberikan 2 poin bonus.</p>
+    </div>
+    <div class="tut-section">
+      <h2>🐉 Tile Naga (Dragon Tiles / 三元牌)</h2>
+      <p>Ada <span class="highlight">3 tile naga</span>, masing-masing ada 4 salinan (total 12 tile). Setiap triplet naga memberikan <span class="highlight">1 poin yaku</span>.</p>
+      <div class="tile-grid" style="max-width:280px;">
+        <div class="tile-demo dragon chun"><div class="t-sym">中</div><div class="t-label">Chun (Merah)</div></div>
+        <div class="tile-demo dragon haku"><div class="t-sym">白</div><div class="t-label">Haku (Putih)</div></div>
+        <div class="tile-demo dragon hatsu"><div class="t-sym">發</div><div class="t-label">Hatsu (Hijau)</div></div>
+      </div>
+      <div class="combo-box"><h3>💡 Catatan Naga</h3><p><b>中 (Chun)</b> = Merah, melambangkan Tengah/Sukses · <b>白 (Haku)</b> = Putih, melambangkan Kemurnian · <b>發 (Hatsu)</b> = Hijau, melambangkan Kemakmuran</p></div>
+    </div>
+    <div class="tut-section">
+      <h2>🌸 Tile Bunga & Musim (Opsional)</h2>
+      <p>Ada <span class="highlight">8 tile bonus</span>: 4 Bunga (梅蘭菊竹) dan 4 Musim (春夏秋冬). Tile ini <span class="highlight">tidak digunakan</span> dalam set dasar simulator ini, tapi umum dalam versi Mahjong regional tertentu.</p>
+    </div>
+  </div>
+
+  <!-- TAB: Kombinasi -->
+  <div id="tut-kombinasi" class="tut-content">
+    <div class="tut-section">
+      <h2>🃏 Jenis Kombinasi (Set)</h2>
+      <div class="combo-box">
+        <h3>🀇 Chow / Urutan (順子 Shùnzi)</h3>
+        <p>3 tile berurutan dari suit yang SAMA. Contoh: 3🎋 4🎋 5🎋 atau 7🀙 8🀙 9🀙. Hanya bisa diambil dari pemain <b>kiri</b> (Chi).</p>
+      </div>
+      <div class="combo-box">
+        <h3>🀇 Pung / Triplet (刻子 Kèzi)</h3>
+        <p>3 tile IDENTIK. Contoh: 東東東 atau 中中中. Bisa diambil dari pemain mana saja (Pon). Bernilai lebih tinggi dari Chow.</p>
+      </div>
+      <div class="combo-box">
+        <h3>🀇 Kong / Quad (槓子 Gàngzi)</h3>
+        <p>4 tile IDENTIK. Setelah membentuk Kong, pemain mengambil 1 tile ekstra dari dinding. Nilainya sangat tinggi (Kan).</p>
+      </div>
+      <div class="combo-box">
+        <h3>🀇 Pair / Pasangan (雀頭 Quètóu)</h3>
+        <p>2 tile IDENTIK. Setiap tangan menang membutuhkan <b>tepat 1 pasangan</b> sebagai "mata" (kepala).</p>
+      </div>
+    </div>
+    <div class="tut-section">
+      <h2>🏆 Tangan Menang Standar</h2>
+      <p>Tangan menang standar terdiri dari <span class="highlight">14 tile</span> yang membentuk:</p>
+      <p style="text-align:center;font-size:1.1rem;color:var(--gold-light);padding:10px;background:rgba(201,168,76,0.1);border-radius:6px;margin:10px 0;">
+        4 Set (Chow/Pung/Kong) + 1 Pasangan
+      </p>
+      <div class="combo-box">
+        <h3>🌟 Tangan Spesial: Tujuh Pasang (七対子)</h3>
+        <p>7 pasangan tile berbeda. Tidak butuh set — murni pasangan! Nilainya tinggi.</p>
+      </div>
+      <div class="combo-box">
+        <h3>🌟 Tangan Spesial: Kokushi Musou (十三幺)</h3>
+        <p>Semua tile terminal dan kehormatan: 1🎋 9🎋 1🔵 9🔵 1萬 9萬 + semua 7 tile kehormatan + 1 duplikat. Tangan paling langka dan bernilai tertinggi!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: Cara Main -->
+  <div id="tut-cara-main" class="tut-content">
+    <div class="tut-section">
+      <h2>🎮 Alur Permainan</h2>
+      <p>1️⃣ <span class="highlight">Bagikan tile</span>: Setiap pemain mendapat 13 tile, dealer mendapat 14 tile dan langsung membuang 1.</p>
+      <p>2️⃣ <span class="highlight">Giliran berlanjut</span>: Pemain aktif mengambil 1 tile dari dinding (Draw), lalu membuang 1 tile.</p>
+      <p>3️⃣ <span class="highlight">Klaim tile buangan</span>: Pemain lain bisa mengklaim tile yang dibuang dengan Chi/Pon/Kan.</p>
+      <p>4️⃣ <span class="highlight">Menang</span>: Pemain yang pertama melengkapi tangan menang memenangkan ronde.</p>
+    </div>
+    <div class="tut-section">
+      <h2>🔧 Aksi dalam Permainan</h2>
+      <div class="combo-box">
+        <h3>📥 DRAW (Ambil Tile)</h3>
+        <p>Di giliran kamu, klik DRAW untuk mengambil tile dari dinding. Tile baru akan muncul berwarna hijau.</p>
+      </div>
+      <div class="combo-box">
+        <h3>🗑️ BUANG (Discard)</h3>
+        <p>Pilih tile di tangan kamu (tile menjadi merah), lalu klik BUANG untuk membuangnya ke tumpukan.</p>
+      </div>
+      <div class="combo-box">
+        <h3>🍜 CHI (Urutan dari Kiri)</h3>
+        <p>Setelah pemain kiri membuang tile, kamu bisa CHI jika tile itu melengkapi urutan di tanganmu. Tombol CHI aktif otomatis bila memungkinkan.</p>
+      </div>
+      <div class="combo-box">
+        <h3>🀄 PON (Triplet)</h3>
+        <p>Bila tile yang dibuang cocok dengan 2 tile sama di tanganmu, klik PON untuk membentuk triplet terbuka.</p>
+      </div>
+      <div class="combo-box">
+        <h3>🀄 KAN (Quad)</h3>
+        <p>Bila kamu punya 4 tile sama, klik KAN untuk membentuk quad. Kamu mendapat 1 tile bonus dari dinding!</p>
+      </div>
+      <div class="combo-box">
+        <h3>🏆 MENANG</h3>
+        <p>Bila tanganmu sudah lengkap (tsumo = dari dinding, atau ron = dari buangan lawan), klik MENANG!</p>
+      </div>
+    </div>
+    <div class="tut-section">
+      <h2>💡 Tips Bermain</h2>
+      <p>• Fokuslah pada <span class="highlight">1-2 jenis suit</span> saja untuk lebih mudah membentuk urutan.</p>
+      <p>• Buang tile <span class="highlight">angin dan naga</span> yang tidak berguna lebih awal.</p>
+      <p>• Tile <span class="highlight">1, 9, dan kehormatan</span> (terminal/honor) lebih sulit digunakan dalam urutan — buang duluan bila tak ada rencana triplet.</p>
+      <p>• Perhatikan tile yang sudah dibuang pemain lain — itu memberimu petunjuk tile apa yang masih ada di dinding.</p>
+    </div>
+  </div>
+
+  <!-- TAB: Skor -->
+  <div id="tut-skor" class="tut-content">
+    <div class="tut-section">
+      <h2>🏆 Cara Menghitung Skor</h2>
+      <p>Skor dasar dihitung dari <span class="highlight">Fu (unit dasar)</span> dan <span class="highlight">Han (poin yaku)</span>:</p>
+      <p style="text-align:center;padding:10px;background:rgba(201,168,76,0.1);border-radius:6px;font-size:1rem;color:var(--gold-light);">
+        Skor = Fu × 2<sup>Han+2</sup> × 4
+      </p>
+      <table class="score-table">
+        <tr><th>Aksi</th><th>Han/Poin</th></tr>
+        <tr><td>Tsumo (menang dari dinding sendiri)</td><td>+1 Han</td></tr>
+        <tr><td>Triplet Naga</td><td>+1 Han</td></tr>
+        <tr><td>Triplet Angin Ronde</td><td>+1 Han</td></tr>
+        <tr><td>Tangan Tertutup + Ron</td><td>+1 Han</td></tr>
+        <tr><td>Tangan Tanyao (semua tile tengah 2-8)</td><td>+1 Han</td></tr>
+        <tr><td>Pinfu (semua urutan + pasangan bukan kehormatan)</td><td>+1 Han</td></tr>
+        <tr><td>Tujuh Pasang</td><td>+2 Han</td></tr>
+        <tr><td>Kokushi Musou</td><td>+13 Han (Yakuman!)</td></tr>
+      </table>
+    </div>
+    <div class="tut-section">
+      <h2>⚡ Yakuman (Tangan Sempurna)</h2>
+      <p>Yakuman adalah kondisi langka dengan nilai maksimum, biasanya <span class="highlight">32.000 poin</span> atau lebih!</p>
+      <div class="combo-box"><h3>💎 Kokushi Musou (十三幺)</h3><p>Semua 13 tile terminal dan kehormatan yang berbeda + 1 duplikat.</p></div>
+      <div class="combo-box"><h3>💎 Suuankou (四暗刻)</h3><p>4 triplet tertutup + 1 pasangan. Semua set tidak boleh dari klaim.</p></div>
+      <div class="combo-box"><h3>💎 Daisangen (大三元)</h3><p>Triplet semua 3 naga: 中, 白, 發.</p></div>
+      <div class="combo-box"><h3>💎 Shousuushii / Daisuushii (小四喜/大四喜)</h3><p>Triplet/quad semua 4 angin (+ pasangan untuk kecil).</p></div>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:30px 0;">
+    <button class="btn-gold" onclick="showScreen('game'); startGame()">🎮 MULAI BERMAIN SEKARANG</button>
+    <button class="btn-green" onclick="showScreen('title')">🏠 Kembali ke Menu</button>
+  </div>
+</div>
+
+<!-- ===== LAYAR PERMAINAN ===== -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <div class="game-title">🀄 Mahjong 麻将</div>
+    <div class="game-info">
+      <div class="info-box">Ronde<span id="info-round">Timur 1</span></div>
+      <div class="info-box">Dinding<span id="info-wall">70</span></div>
+      <div class="info-box">Giliran<span id="info-turn">Kamu</span></div>
+      <div class="info-box">Skormu<span id="info-score">25000</span></div>
+    </div>
+    <div>
+      <button class="btn-green" onclick="showScreen('tutorial')" style="font-size:0.75rem;padding:6px 14px;">📖 Tutorial</button>
+      <button class="btn-green" onclick="showScreen('title')" style="font-size:0.75rem;padding:6px 14px;">🏠 Menu</button>
+    </div>
+  </div>
+
+  <div class="game-board">
+    <!-- Lawan Atas -->
+    <div class="player-area">
+      <div class="player-label">🤖 Lawan Atas (Barat) <span class="score-badge" id="score-top">25000</span></div>
+      <div class="opponent-hand" id="hand-top"></div>
+      <div class="meld-area" id="meld-top"></div>
+    </div>
+
+    <!-- Area Tengah -->
+    <div class="middle-area">
+      <!-- Buangan Kiri -->
+      <div class="discard-pile">
+        <h4>BUANGAN KIRI</h4>
+        <div class="discard-grid" id="discard-left"></div>
+      </div>
+
+      <!-- Info Tengah -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <!-- Buangan Atas -->
+        <div class="discard-pile" style="min-height:80px;">
+          <h4>BUANGAN ATAS</h4>
+          <div class="discard-grid" id="discard-top"></div>
+        </div>
+        <div class="center-info">
+          <div class="wind-indicator" id="round-wind">東</div>
+          <div class="round-info" id="round-info-text">Ronde Timur · Babak 1</div>
+          <div class="wall-count">🀄 Sisa Dinding: <strong id="wall-display">70</strong></div>
+          <div class="drawn-tile-display" id="drawn-display">Belum ada tile</div>
+        </div>
+        <!-- Buangan Bawah (Kita) -->
+        <div class="discard-pile" style="min-height:80px;">
+          <h4>BUANGANMU</h4>
+          <div class="discard-grid" id="discard-player"></div>
+        </div>
+      </div>
+
+      <!-- Buangan Kanan -->
+      <div class="discard-pile">
+        <h4>BUANGAN KANAN</h4>
+        <div class="discard-grid" id="discard-right"></div>
+      </div>
+    </div>
+
+    <!-- Tangan Pemain -->
+    <div class="player-area" style="background:rgba(30,92,56,0.3);border-color:rgba(201,168,76,0.3);">
+      <div class="player-label">🧑 TANGANMU <span class="score-badge" id="score-player">25000</span></div>
+      <div class="player-hand" id="hand-player"></div>
+      <div class="meld-area" id="meld-player"></div>
+    </div>
+
+    <!-- Action Bar -->
+    <div>
+      <div class="action-bar">
+        <button class="action-btn btn-draw" id="btn-draw" onclick="drawTile()">📥 AMBIL TILE</button>
+        <button class="action-btn btn-discard" id="btn-discard" onclick="discardSelected()" disabled>🗑️ BUANG</button>
+        <button class="action-btn btn-chi" id="btn-chi" onclick="doChi()" disabled>🍜 CHI</button>
+        <button class="action-btn btn-pon" id="btn-pon" onclick="doPon()" disabled>🀄 PON</button>
+        <button class="action-btn btn-kan" id="btn-kan" onclick="doKan()" disabled>⚡ KAN</button>
+        <button class="action-btn btn-win" id="btn-win" onclick="declareWin()" disabled>🏆 MENANG!</button>
+      </div>
+      <div class="game-log" id="game-log">
+        <div class="log-entry">Selamat datang di Mahjong Simulator! Klik AMBIL TILE untuk memulai.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Menang -->
+<div class="modal-overlay" id="modal-win">
+  <div class="modal-box">
+    <h2>🏆 SELAMAT!</h2>
+    <div class="win-score" id="win-score-display">+8000</div>
+    <div class="win-hands" id="win-hands-display"></div>
+    <p id="win-desc">Kamu berhasil menyelesaikan tangan Mahjong!</p>
+    <button class="btn-gold" onclick="startGame(); closeModal('modal-win')">🔄 Ronde Baru</button>
+    <button class="btn-green" onclick="showScreen('title'); closeModal('modal-win')">🏠 Menu Utama</button>
+  </div>
+</div>
+
+<!-- Modal Kalah (Dinding Habis) -->
+<div class="modal-overlay" id="modal-draw">
+  <div class="modal-box">
+    <h2>🌊 SERI (Ryuukyoku)</h2>
+    <p>Dinding habis tanpa ada yang menang. Ronde berakhir seri. Pemain yang belum tenpai membayar denda!</p>
+    <button class="btn-gold" onclick="startGame(); closeModal('modal-draw')">🔄 Ronde Baru</button>
+    <button class="btn-green" onclick="showScreen('title'); closeModal('modal-draw')">🏠 Menu Utama</button>
+  </div>
+</div>
+
+<script>
+// =============================================
+// DATA TILE
+// =============================================
+const TILES = [];
+const SUITS = ['bambu','lingkaran','wan'];
+const SUIT_SYMS = {
+  bambu: ['🎋','🀐','🀑','🀒','🀓','🀔','🀕','🀖','🀗'],
+  lingkaran: ['🀙','🀚','🀛','🀜','🀝','🀞','🀟','🀠','🀡'],
+  wan: ['一萬','二萬','三萬','四萬','五萬','六萬','七萬','八萬','九萬']
+};
+const WINDS = [{sym:'東',name:'Timur'},{sym:'南',name:'Selatan'},{sym:'西',name:'Barat'},{sym:'北',name:'Utara'}];
+const DRAGONS = [{sym:'中',name:'Chun',cls:'dragon-chun'},{sym:'白',name:'Haku',cls:'dragon-haku'},{sym:'發',name:'Hatsu',cls:'dragon-hatsu'}];
+
+function buildDeck() {
+  const deck = [];
+  for (let s = 0; s < 3; s++) {
+    for (let n = 1; n <= 9; n++) {
+      for (let c = 0; c < 4; c++) {
+        deck.push({ suit: SUITS[s], num: n, sym: SUIT_SYMS[SUITS[s]][n-1], cls: SUITS[s] === 'wan' ? 'mwan' : SUITS[s] });
+      }
+    }
+  }
+  for (const w of WINDS) {
+    for (let c = 0; c < 4; c++) deck.push({ suit: 'wind', num: 0, sym: w.sym, name: w.name, cls: 'wind' });
+  }
+  for (const d of DRAGONS) {
+    for (let c = 0; c < 4; c++) deck.push({ suit: 'dragon', num: 0, sym: d.sym, name: d.name, cls: d.cls });
+  }
+  return deck;
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function tileKey(t) { return t.suit + '_' + t.num + '_' + t.sym; }
+
+// =============================================
+// STATE PERMAINAN
+// =============================================
+let state = {};
+
+function startGame() {
+  const deck = shuffle(buildDeck());
+  state = {
+    wall: deck,
+    playerHand: [],
+    opponentHands: [[],[],[]], // kiri, atas, kanan
+    playerMelds: [],
+    opponentMelds: [[],[],[]],
+    discards: [[], [], [], []], // player, kiri, atas, kanan
+    scores: [25000, 25000, 25000, 25000],
+    round: 0,
+    turn: 0, // 0 = player
+    phase: 'draw', // draw | discard | claim
+    selectedTile: -1,
+    lastDiscard: null,
+    lastDiscardFrom: -1,
+    drawnTile: null,
+    canChi: false,
+    canPon: false,
+    canKan: false,
+    gameOver: false
+  };
+
+  // Bagikan tile
+  for (let i = 0; i < 13; i++) {
+    state.playerHand.push(state.wall.pop());
+    for (let o = 0; o < 3; o++) state.opponentHands[o].push(state.wall.pop());
+  }
+  // Dealer (player) dapat 1 ekstra
+  state.playerHand.push(state.wall.pop());
+  state.phase = 'discard';
+
+  addLog('Tile dibagikan! Kamu adalah Dealer (Timur). Pilih tile untuk dibuang.', 'important');
+  updateUI();
+}
+
+// =============================================
+// LOGIKA GAME
+// =============================================
+function drawTile() {
+  if (state.phase !== 'draw' || state.turn !== 0 || state.wall.length === 0) return;
+  const tile = state.wall.pop();
+  tile.isNew = true;
+  state.playerHand.push(tile);
+  state.drawnTile = tile;
+  state.phase = 'discard';
+  addLog(`Kamu mengambil tile: ${tile.sym}`);
+  checkWin(state.playerHand, state.playerMelds, true);
+  updateUI();
+}
+
+function discardSelected() {
+  if (state.selectedTile < 0 || state.phase !== 'discard' || state.turn !== 0) return;
+  const idx = state.selectedTile;
+  const tile = state.playerHand[idx];
+  state.playerHand.splice(idx, 1);
+  state.playerHand.forEach(t => t.isNew = false);
+  state.discards[0].push(tile);
+  state.lastDiscard = tile;
+  state.lastDiscardFrom = 0;
+  state.selectedTile = -1;
+  state.drawnTile = null;
+  addLog(`Kamu membuang: ${tile.sym}`);
+  state.phase = 'claim';
+  // AI check klaim
+  setTimeout(() => {
+    aiDecideClaim();
+  }, 600);
+  updateUI();
+}
+
+function aiDecideClaim() {
+  // Sederhana: AI Pon jika punya 2 tile sama
+  let claimed = false;
+  for (let o = 0; o < 3; o++) {
+    const hand = state.opponentHands[o];
+    const matches = hand.filter(t => tileKey(t) === tileKey(state.lastDiscard));
+    if (matches.length >= 2 && Math.random() > 0.6) {
+      // Pon
+      const idxs = [];
+      for (let i = 0; i < hand.length; i++) {
+        if (tileKey(hand[i]) === tileKey(state.lastDiscard) && idxs.length < 2) idxs.push(i);
+      }
+      idxs.sort((a,b)=>b-a).forEach(i => hand.splice(i,1));
+      state.opponentMelds[o].push([{...state.lastDiscard},{...state.lastDiscard},{...state.lastDiscard}]);
+      addLog(`Lawan ${['Kiri','Atas','Kanan'][o]} PON! ${state.lastDiscard.sym}${state.lastDiscard.sym}${state.lastDiscard.sym}`, 'important');
+      // AI buang tile
+      const discardIdx = Math.floor(Math.random() * hand.length);
+      const discarded = hand.splice(discardIdx, 1)[0];
+      state.discards[o+1].push(discarded);
+      state.lastDiscard = discarded;
+      state.lastDiscardFrom = o+1;
+      addLog(`Lawan ${['Kiri','Atas','Kanan'][o]} membuang: ${discarded.sym}`);
+      claimed = true;
+      break;
+    }
+  }
+  if (!claimed) {
+    nextTurn();
+  }
+  checkClaimButtons();
+  updateUI();
+}
+
+function nextTurn() {
+  if (state.wall.length === 0) {
+    showModal('modal-draw');
+    return;
+  }
+  // Giliran lawan (simulasi)
+  for (let o = 0; o < 3; o++) {
+    const tile = state.wall.pop();
+    state.opponentHands[o].push(tile);
+    if (state.wall.length === 0) break;
+    // AI buang tile
+    const discardIdx = Math.floor(Math.random() * state.opponentHands[o].length);
+    const discarded = state.opponentHands[o].splice(discardIdx, 1)[0];
+    state.discards[o+1].push(discarded);
+    state.lastDiscard = discarded;
+    state.lastDiscardFrom = o+1;
+    addLog(`Lawan ${['Kiri','Atas','Kanan'][o]} membuang: ${discarded.sym}`);
+  }
+  // Kembali ke giliran player
+  state.turn = 0;
+  state.phase = 'draw';
+  checkClaimButtons();
+  updateUI();
+}
+
+function checkClaimButtons() {
+  if (!state.lastDiscard) { state.canChi = state.canPon = state.canKan = false; return; }
+  const hand = state.playerHand;
+  const key = tileKey(state.lastDiscard);
+  const matches = hand.filter(t => tileKey(t) === key);
+  state.canPon = matches.length >= 2;
+  state.canKan = matches.length >= 3;
+  // Chi: hanya dari kiri (lastDiscardFrom === 1), cek urutan
+  state.canChi = false;
+  if (state.lastDiscardFrom === 1 && state.lastDiscard.suit !== 'wind' && state.lastDiscard.suit !== 'dragon') {
+    const n = state.lastDiscard.num;
+    const s = state.lastDiscard.suit;
+    const nums = hand.filter(t => t.suit === s).map(t => t.num);
+    if ((nums.includes(n-1) && nums.includes(n-2)) ||
+        (nums.includes(n-1) && nums.includes(n+1)) ||
+        (nums.includes(n+1) && nums.includes(n+2))) {
+      state.canChi = true;
+    }
+  }
+}
+
+function doChi() {
+  if (!state.canChi) return;
+  const n = state.lastDiscard.num;
+  const s = state.lastDiscard.suit;
+  const hand = state.playerHand;
+  const nums = hand.filter(t => t.suit === s).map(t => t.num);
+  let set = null;
+  if (nums.includes(n-2) && nums.includes(n-1)) set = [n-2, n-1, n];
+  else if (nums.includes(n-1) && nums.includes(n+1)) set = [n-1, n, n+1];
+  else if (nums.includes(n+1) && nums.includes(n+2)) set = [n, n+1, n+2];
+  if (!set) return;
+  const meld = [];
+  for (const num of set) {
+    if (num === n) { meld.push({...state.lastDiscard}); continue; }
+    const idx = hand.findIndex(t => t.suit === s && t.num === num);
+    meld.push(...hand.splice(idx, 1));
+  }
+  state.playerMelds.push(meld);
+  state.lastDiscard = null;
+  state.canChi = state.canPon = state.canKan = false;
+  state.phase = 'discard';
+  addLog(`Kamu CHI! Urutan: ${meld.map(t=>t.sym).join(' ')}`, 'important');
+  updateUI();
+}
+
+function doPon() {
+  if (!state.canPon) return;
+  const hand = state.playerHand;
+  const key = tileKey(state.lastDiscard);
+  const meld = [{...state.lastDiscard}];
+  let count = 0;
+  for (let i = hand.length - 1; i >= 0 && count < 2; i--) {
+    if (tileKey(hand[i]) === key) { meld.push(...hand.splice(i, 1)); count++; }
+  }
+  state.playerMelds.push(meld);
+  state.lastDiscard = null;
+  state.canChi = state.canPon = state.canKan = false;
+  state.phase = 'discard';
+  addLog(`Kamu PON! Triplet: ${meld[0].sym}${meld[0].sym}${meld[0].sym}`, 'important');
+  updateUI();
+}
+
+function doKan() {
+  if (!state.canKan) return;
+  const hand = state.playerHand;
+  const key = tileKey(state.lastDiscard);
+  const meld = [{...state.lastDiscard}];
+  let count = 0;
+  for (let i = hand.length - 1; i >= 0 && count < 3; i--) {
+    if (tileKey(hand[i]) === key) { meld.push(...hand.splice(i, 1)); count++; }
+  }
+  state.playerMelds.push(meld);
+  // Ambil tile bonus
+  const bonus = state.wall.pop();
+  if (bonus) { bonus.isNew = true; hand.push(bonus); }
+  state.lastDiscard = null;
+  state.canChi = state.canPon = state.canKan = false;
+  state.phase = 'discard';
+  addLog(`Kamu KAN! Quad: ${meld[0].sym} ×4. Dapat tile bonus: ${bonus ? bonus.sym : '(kosong)'}`, 'important');
+  updateUI();
+}
+
+function selectTile(idx) {
+  if (state.phase !== 'discard' || state.turn !== 0) return;
+  state.selectedTile = state.selectedTile === idx ? -1 : idx;
+  updateUI();
+}
+
+// =============================================
+// CEK MENANG
+// =============================================
+function checkWin(hand, melds, autoCheck = false) {
+  const allTiles = [...hand];
+  const total = allTiles.length + melds.reduce((s,m) => s + m.length, 0);
+  // Standar: 14 tile
+  if (total !== 14) { return false; }
+  if (isWinningHand(allTiles, melds)) {
+    if (autoCheck) {
+      document.getElementById('btn-win').disabled = false;
+    }
+    return true;
+  }
+  return false;
+}
+
+function isWinningHand(hand, melds) {
+  // Cek 7 pasang
+  if (melds.length === 0 && hand.length === 14) {
+    const keys = hand.map(tileKey).sort();
+    let pairs = 0;
+    for (let i = 0; i < keys.length; i += 2) {
+      if (keys[i] === keys[i+1]) pairs++;
+      else { pairs = 0; break; }
+    }
+    if (pairs === 7) return true;
+  }
+  // Standar: melds sudah terbentuk + cari pair + sets dari hand
+  const setsNeeded = 4 - melds.length;
+  return canFormSetsAndPair(hand.slice(), setsNeeded);
+}
+
+function canFormSetsAndPair(hand, setsNeeded) {
+  if (hand.length === 0 && setsNeeded === 0) return false; // butuh pair
+  // Cari pair dulu
+  const keys = hand.map(tileKey);
+  const seen = new Set();
+  for (let i = 0; i < hand.length; i++) {
+    const k = keys[i];
+    if (seen.has(k)) continue;
+    seen.add(k);
+    // Coba jadikan pair
+    const pairIdx = keys.indexOf(k, i+1);
+    if (pairIdx === -1) continue;
+    const rest = hand.filter((_,idx) => idx !== i && idx !== pairIdx);
+    if (canFormSets(rest, setsNeeded)) return true;
+  }
+  return false;
+}
+
+function canFormSets(hand, n) {
+  if (n === 0) return hand.length === 0;
+  if (hand.length === 0) return false;
+  // Coba triplet
+  const first = hand[0];
+  const k = tileKey(first);
+  const sameCount = hand.filter(t => tileKey(t) === k).length;
+  if (sameCount >= 3) {
+    let removed = 0;
+    const rest = hand.filter(t => { if (removed < 3 && tileKey(t) === k) { removed++; return false; } return true; });
+    if (canFormSets(rest, n-1)) return true;
+  }
+  // Coba urutan
+  if (first.suit !== 'wind' && first.suit !== 'dragon') {
+    const s = first.suit, n1 = first.num;
+    const i2 = hand.findIndex(t => t.suit === s && t.num === n1+1);
+    const i3 = hand.findIndex((t,idx) => t.suit === s && t.num === n1+2 && idx !== i2);
+    if (i2 !== -1 && i3 !== -1) {
+      const rest = hand.filter((_,idx) => idx !== 0 && idx !== i2 && idx !== i3);
+      if (canFormSets(rest, n-1)) return true;
+    }
+  }
+  return false;
+}
+
+function declareWin() {
+  const hand = state.playerHand;
+  const melds = state.playerMelds;
+  // Hitung skor
+  let han = 1; // Tsumo dasar
+  let yakuList = ['Tsumo (menang dari dinding)'];
+  // Cek Naga
+  const dragon_melds = melds.filter(m => m[0].suit === 'dragon');
+  han += dragon_melds.length;
+  if (dragon_melds.length > 0) yakuList.push(`Naga ×${dragon_melds.length}`);
+  // Cek 7 pasang
+  const allKeys = hand.map(tileKey).sort();
+  let pairs7 = 0;
+  for (let i = 0; i < allKeys.length; i += 2) {
+    if (allKeys[i] === allKeys[i+1]) pairs7++;
+    else { pairs7 = 0; break; }
+  }
+  if (pairs7 === 7) { han += 2; yakuList.push('Tujuh Pasang (七対子)'); }
+  // Hitung skor sederhana
+  const baseScore = Math.pow(2, han + 2) * 30;
+  state.scores[0] += baseScore;
+  document.getElementById('win-score-display').textContent = '+' + baseScore.toLocaleString();
+  document.getElementById('win-hands-display').textContent = yakuList.join(' · ');
+  document.getElementById('win-desc').textContent = `Han: ${han} · Skor Total: ${state.scores[0].toLocaleString()}`;
+  showModal('modal-win');
+  addLog(`🏆 MENANG! ${yakuList.join(', ')} — +${baseScore} poin!`, 'win');
+}
+
+// =============================================
+// UI
+// =============================================
+function renderTile(tile, idx, isPlayer = false) {
+  const div = document.createElement('div');
+  div.className = `tile-main ${tile.cls}${tile.isNew ? ' new-tile' : ''}${state.selectedTile === idx && isPlayer ? ' selected' : ''}`;
+  const numDiv = document.createElement('div');
+  numDiv.className = 't-num';
+  if (tile.num > 0) numDiv.textContent = tile.num;
+  div.appendChild(numDiv);
+  const symDiv = document.createElement('div');
+  symDiv.className = 't-sym';
+  symDiv.textContent = tile.sym;
+  div.appendChild(symDiv);
+  if (isPlayer) div.onclick = () => selectTile(idx);
+  return div;
+}
+
+function renderSmallTile(tile, isLatest = false) {
+  const div = document.createElement('div');
+  div.className = `tile-sm ${tile.cls}${isLatest ? ' latest' : ''}`;
+  div.textContent = tile.sym;
+  div.title = tile.name || tile.sym;
+  return div;
+}
+
+function renderMeld(meld) {
+  const div = document.createElement('div');
+  div.className = 'meld-set';
+  meld.forEach(t => div.appendChild(renderSmallTile(t)));
+  return div;
+}
+
+function updateUI() {
+  // Tangan player
+  const handEl = document.getElementById('hand-player');
+  handEl.innerHTML = '';
+  state.playerHand.forEach((t, i) => handEl.appendChild(renderTile(t, i, true)));
+
+  // Meld player
+  const meldEl = document.getElementById('meld-player');
+  meldEl.innerHTML = '';
+  state.playerMelds.forEach(m => meldEl.appendChild(renderMeld(m)));
+
+  // Lawan
+  ['top'].forEach((pos, oi) => {
+    const opIdx = 1; // hanya 1 lawan ditampilkan di atas
+    const handOpEl = document.getElementById(`hand-${pos}`);
+    handOpEl.innerHTML = '';
+    state.opponentHands[opIdx].forEach(() => {
+      const back = document.createElement('div');
+      back.className = 'tile-back';
+      back.textContent = '🀫';
+      handOpEl.appendChild(back);
+    });
+    const meldOpEl = document.getElementById(`meld-${pos}`);
+    meldOpEl.innerHTML = '';
+    state.opponentMelds[opIdx].forEach(m => meldOpEl.appendChild(renderMeld(m)));
+  });
+
+  // Buangan
+  ['player','left','top','right'].forEach((pos, i) => {
+    const el = document.getElementById(`discard-${pos}`);
+    el.innerHTML = '';
+    state.discards[i].forEach((t, ti) => {
+      el.appendChild(renderSmallTile(t, ti === state.discards[i].length - 1));
+    });
+  });
+
+  // Info
+  document.getElementById('info-wall').textContent = state.wall.length;
+  document.getElementById('wall-display').textContent = state.wall.length;
+  document.getElementById('info-score').textContent = state.scores[0].toLocaleString();
+  document.getElementById('score-player').textContent = state.scores[0].toLocaleString();
+  document.getElementById('score-top').textContent = state.scores[1].toLocaleString();
+  document.getElementById('info-turn').textContent = state.turn === 0 ? 'Kamu' : 'Lawan';
+  document.getElementById('drawn-display').textContent = state.drawnTile ? `Tile baru: ${state.drawnTile.sym}` : 'Belum ambil tile';
+
+  // Buttons
+  const inDraw = state.phase === 'draw' && state.turn === 0;
+  const inDiscard = state.phase === 'discard' && state.turn === 0;
+  document.getElementById('btn-draw').disabled = !inDraw || state.wall.length === 0;
+  document.getElementById('btn-discard').disabled = !inDiscard || state.selectedTile < 0;
+  document.getElementById('btn-chi').disabled = !state.canChi;
+  document.getElementById('btn-pon').disabled = !state.canPon;
+  document.getElementById('btn-kan').disabled = !state.canKan;
+  // Cek menang
+  const canWin = checkWin(state.playerHand, state.playerMelds);
+  document.getElementById('btn-win').disabled = !canWin;
+}
+
+function addLog(msg, cls = '') {
+  const log = document.getElementById('game-log');
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${cls}`;
+  entry.textContent = msg;
+  log.insertBefore(entry, log.firstChild);
+  if (log.children.length > 20) log.removeChild(log.lastChild);
+}
+
+function showFloatNotif(msg, duration = 2000) {
+  const el = document.getElementById('floatNotif');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', duration);
+}
+
+// =============================================
+// SCREEN & MODAL MANAGEMENT
+// =============================================
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+
+function showModal(id) {
+  document.getElementById(id).classList.add('active');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+function showTutTab(tab) {
+  document.querySelectorAll('.tut-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tut-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tut-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  showScreen('title');
+});
+</script>
+</body>
+</html>
