@@ -6,840 +6,381 @@
 <title>Mahjong Simulator — 麻将</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Cinzel+Decorative:wght@400;700&family=Noto+Sans:wght@300;400;600&display=swap');
-
   :root {
-    --green: #1a4a2e;
-    --green-light: #2d6b45;
-    --green-felt: #1e5c38;
-    --gold: #c9a84c;
-    --gold-light: #f0d080;
-    --ivory: #fdf6e3;
-    --ivory-dark: #e8d5a0;
-    --red: #c0392b;
-    --red-bright: #e74c3c;
-    --dark: #0d1f15;
-    --tile-bg: #fdf6e3;
-    --tile-border: #c9a84c;
-    --shadow: rgba(0,0,0,0.5);
+    --green:#1a4a2e;--green-light:#2d6b45;--green-felt:#1e5c38;
+    --gold:#c9a84c;--gold-light:#f0d080;--ivory:#fdf6e3;--ivory-dark:#e8d5a0;
+    --red:#c0392b;--red-bright:#e74c3c;--dark:#0d1f15;
+    --tile-bg:#fdf6e3;--tile-border:#c9a84c;--shadow:rgba(0,0,0,0.5);
   }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--dark);font-family:'Noto Sans',sans-serif;color:var(--ivory);min-height:100vh;overflow-x:hidden;}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ===== TITLE ===== */
+  #screen-title{flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at center,#1a4a2e 0%,#0d1f15 70%);position:relative;overflow:hidden;}
+  #screen-title::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");opacity:0.4;pointer-events:none;}
+  .title-main{font-family:'Cinzel Decorative',serif;font-size:clamp(2rem,6vw,4rem);color:var(--gold);text-shadow:0 0 30px rgba(201,168,76,0.5);letter-spacing:4px;animation:glow 3s ease-in-out infinite alternate;}
+  .title-chinese{font-family:'Noto Serif SC',serif;font-size:clamp(3rem,10vw,6rem);color:var(--gold-light);text-shadow:0 0 40px rgba(201,168,76,0.6);margin:10px 0;}
+  .title-sub{color:rgba(232,213,160,0.55);letter-spacing:4px;font-size:0.78rem;text-transform:uppercase;margin-bottom:50px;font-weight:300;}
+  @keyframes glow{from{text-shadow:0 0 20px rgba(201,168,76,0.3);}to{text-shadow:0 0 50px rgba(201,168,76,0.8),0 0 80px rgba(201,168,76,0.3);}}
+  .btn-gold{background:linear-gradient(135deg,#c9a84c,#f0d080,#c9a84c);color:#1a0a00;border:none;padding:14px 40px;font-family:'Cinzel Decorative',serif;font-size:0.9rem;cursor:pointer;border-radius:4px;letter-spacing:2px;margin:8px;transition:all 0.3s;box-shadow:0 4px 15px rgba(201,168,76,0.4);}
+  .btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(201,168,76,0.6);background:linear-gradient(135deg,#f0d080,#fff5b0,#f0d080);}
+  .btn-green{background:linear-gradient(135deg,#1a4a2e,#2d6b45);color:var(--gold);border:2px solid var(--gold);padding:12px 36px;font-family:'Noto Sans',sans-serif;font-size:0.95rem;cursor:pointer;border-radius:4px;letter-spacing:1px;margin:8px;transition:all 0.3s;}
+  .btn-green:hover{background:var(--green-light);box-shadow:0 4px 15px rgba(201,168,76,0.3);}
+  .btn-red{background:linear-gradient(135deg,#8b0000,#c0392b);color:white;border:2px solid #e74c3c;padding:10px 28px;font-family:'Noto Sans',sans-serif;font-size:0.9rem;cursor:pointer;border-radius:4px;margin:5px;transition:all 0.3s;}
+  .btn-red:hover{background:#c0392b;box-shadow:0 4px 15px rgba(231,76,60,0.4);}
 
-  body {
-    background: var(--dark);
-    font-family: 'Noto Sans', sans-serif;
-    color: var(--ivory);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ===== LAYAR JUDUL ===== */
-  #screen-title {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: radial-gradient(ellipse at center, #1a4a2e 0%, #0d1f15 70%);
-    position: relative;
-    overflow: hidden;
-  }
-  #screen-title::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    opacity: 0.4;
-    pointer-events: none;
-  }
-  .title-main {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: clamp(2rem, 6vw, 4rem);
-    color: var(--gold);
-    text-shadow: 0 0 30px rgba(201,168,76,0.5), 0 2px 4px rgba(0,0,0,0.8);
-    letter-spacing: 4px;
-    animation: glow 3s ease-in-out infinite alternate;
-  }
-  .title-chinese {
-    font-family: 'Noto Serif SC', serif;
-    font-size: clamp(3rem, 10vw, 6rem);
-    color: var(--gold-light);
-    text-shadow: 0 0 40px rgba(201,168,76,0.6);
-    margin: 10px 0;
-  }
-  .title-sub {
-    font-family: 'Noto Sans', sans-serif;
-    color: rgba(232,213,160,0.55);
-    letter-spacing: 4px;
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    margin-bottom: 50px;
-    font-weight: 300;
-  }
-  @keyframes glow {
-    from { text-shadow: 0 0 20px rgba(201,168,76,0.3); }
-    to { text-shadow: 0 0 50px rgba(201,168,76,0.8), 0 0 80px rgba(201,168,76,0.3); }
-  }
-  .btn-gold {
-    background: linear-gradient(135deg, #c9a84c, #f0d080, #c9a84c);
-    color: #1a0a00;
-    border: none;
-    padding: 14px 40px;
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 0.9rem;
-    cursor: pointer;
-    border-radius: 4px;
-    letter-spacing: 2px;
-    margin: 8px;
-    transition: all 0.3s;
-    box-shadow: 0 4px 15px rgba(201,168,76,0.4);
-    font-weight: 400;
-  }
-  .btn-gold:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(201,168,76,0.6);
-    background: linear-gradient(135deg, #f0d080, #fff5b0, #f0d080);
-  }
-  .btn-green {
-    background: linear-gradient(135deg, #1a4a2e, #2d6b45);
-    color: var(--gold);
-    border: 2px solid var(--gold);
-    padding: 12px 36px;
-    font-family: 'Noto Sans', sans-serif;
-    font-size: 0.95rem;
-    cursor: pointer;
-    border-radius: 4px;
-    letter-spacing: 1px;
-    margin: 8px;
-    transition: all 0.3s;
-  }
-  .btn-green:hover {
-    background: var(--green-light);
-    box-shadow: 0 4px 15px rgba(201,168,76,0.3);
-  }
-  .btn-red {
-    background: linear-gradient(135deg, #8b0000, #c0392b);
-    color: white;
-    border: 2px solid #e74c3c;
-    padding: 10px 28px;
-    font-family: 'Noto Sans', sans-serif;
-    font-size: 0.9rem;
-    cursor: pointer;
-    border-radius: 4px;
-    margin: 5px;
-    transition: all 0.3s;
-  }
-  .btn-red:hover { background: #c0392b; box-shadow: 0 4px 15px rgba(231,76,60,0.4); }
-
-  /* ===== LAYAR UMUM ===== */
-  .screen:not(.active) { display: none !important; }
-  #screen-title.active { display: flex; }
-  #screen-game.active { display: flex; }
-  #screen-tutorial.active { display: block; }
+  .screen:not(.active){display:none!important;}
+  #screen-title.active{display:flex;}
+  #screen-game.active{display:flex;}
+  #screen-tutorial.active{display:block;}
 
   /* ===== TUTORIAL ===== */
-  #screen-tutorial {
-    min-height: 100vh;
-    background: linear-gradient(180deg, #0d1f15 0%, #0a1a10 100%);
-    padding: 20px;
-  }
-  .tutorial-header {
-    text-align: center;
-    padding: 30px 0 20px;
-    border-bottom: 2px solid rgba(201,168,76,0.3);
-    margin-bottom: 30px;
-  }
-  .tutorial-header h1 {
-    font-family: 'Cinzel Decorative', serif;
-    color: var(--gold);
-    font-size: 1.8rem;
-    letter-spacing: 3px;
-  }
-  .tut-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 30px;
-  }
-  .tut-tab {
-    background: rgba(201,168,76,0.1);
-    border: 1px solid rgba(201,168,76,0.3);
-    color: var(--ivory-dark);
-    padding: 8px 18px;
-    cursor: pointer;
-    border-radius: 3px;
-    font-size: 0.85rem;
-    transition: all 0.2s;
-  }
-  .tut-tab.active, .tut-tab:hover {
-    background: rgba(201,168,76,0.25);
-    border-color: var(--gold);
-    color: var(--gold);
-  }
-  .tut-content { display: none; max-width: 900px; margin: 0 auto; }
-  .tut-content.active { display: block; }
-  .tut-section {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(201,168,76,0.2);
-    border-radius: 8px;
-    padding: 24px;
-    margin-bottom: 20px;
-  }
-  .tut-section h2 {
-    font-family: 'Noto Serif SC', serif;
-    color: var(--gold);
-    font-size: 1.3rem;
-    margin-bottom: 15px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(201,168,76,0.2);
-  }
-  .tut-section p { color: #c5d5c5; line-height: 1.8; margin-bottom: 10px; font-size: 0.95rem; }
-  .tile-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-    gap: 10px;
-    margin: 15px 0;
-  }
-  .tile-demo {
-    background: var(--tile-bg);
-    border: 2px solid var(--tile-border);
-    border-radius: 6px;
-    padding: 6px 4px;
-    text-align: center;
-    cursor: default;
-    box-shadow: 2px 3px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.8);
-    min-height: 70px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s;
-  }
-  .tile-demo:hover { transform: translateY(-3px); }
-  .tile-demo .t-sym { font-size: 1.5rem; line-height: 1; }
-  .tile-demo .t-label { font-size: 0.6rem; color: #444; margin-top: 3px; font-family: 'Noto Sans', sans-serif; }
-  .tile-demo.bamboo .t-sym { color: #1a6a2e; }
-  .tile-demo.circle .t-sym { color: #1a3a8a; }
-  .tile-demo.mwan .t-sym { font-family: 'Noto Serif SC', serif; color: #8a0000; font-size: 1.3rem; }
-  .tile-demo.wind .t-sym { font-family: 'Noto Serif SC', serif; color: #1a1a6a; font-size: 1.3rem; }
-  .tile-demo.dragon .t-sym { font-family: 'Noto Serif SC', serif; font-size: 1.3rem; }
-  .tile-demo.dragon.chun .t-sym { color: #c0392b; }
-  .tile-demo.dragon.haku .t-sym { color: #888; }
-  .tile-demo.dragon.hatsu .t-sym { color: #1a6a2e; }
-  .combo-box {
-    background: rgba(201,168,76,0.08);
-    border-left: 3px solid var(--gold);
-    padding: 12px 16px;
-    margin: 10px 0;
-    border-radius: 0 6px 6px 0;
-  }
-  .combo-box h3 { color: var(--gold-light); font-size: 1rem; margin-bottom: 6px; }
-  .combo-box p { color: #b0c5b0; font-size: 0.88rem; margin: 0; }
-  .highlight { color: var(--gold-light); font-weight: 600; }
-  .score-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-  .score-table th { background: rgba(201,168,76,0.2); color: var(--gold); padding: 10px; text-align: left; font-size: 0.9rem; }
-  .score-table td { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #c5d5c5; font-size: 0.88rem; }
-  .score-table tr:hover td { background: rgba(255,255,255,0.03); }
+  #screen-tutorial{min-height:100vh;background:linear-gradient(180deg,#0d1f15 0%,#0a1a10 100%);padding:20px;}
+  .tutorial-header{text-align:center;padding:30px 0 20px;border-bottom:2px solid rgba(201,168,76,0.3);margin-bottom:30px;}
+  .tutorial-header h1{font-family:'Cinzel Decorative',serif;color:var(--gold);font-size:1.8rem;letter-spacing:3px;}
+  .tut-tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:30px;}
+  .tut-tab{background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.3);color:var(--ivory-dark);padding:8px 18px;cursor:pointer;border-radius:3px;font-size:0.85rem;transition:all 0.2s;}
+  .tut-tab.active,.tut-tab:hover{background:rgba(201,168,76,0.25);border-color:var(--gold);color:var(--gold);}
+  .tut-content{display:none;max-width:900px;margin:0 auto;}
+  .tut-content.active{display:block;}
+  .tut-section{background:rgba(255,255,255,0.03);border:1px solid rgba(201,168,76,0.2);border-radius:8px;padding:24px;margin-bottom:20px;}
+  .tut-section h2{font-family:'Noto Serif SC',serif;color:var(--gold);font-size:1.3rem;margin-bottom:15px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,0.2);}
+  .tut-section p{color:#c5d5c5;line-height:1.8;margin-bottom:10px;font-size:0.95rem;}
+  .tile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:10px;margin:15px 0;}
+  .tile-demo{background:var(--tile-bg);border:2px solid var(--tile-border);border-radius:6px;padding:6px 4px;text-align:center;cursor:default;box-shadow:2px 3px 6px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.8);min-height:70px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:transform 0.2s;}
+  .tile-demo:hover{transform:translateY(-3px);}
+  .tile-demo .t-sym{font-size:1.5rem;line-height:1;}
+  .tile-demo .t-label{font-size:0.6rem;color:#444;margin-top:3px;font-family:'Noto Sans',sans-serif;}
+  .tile-demo.bamboo .t-sym{color:#1a6a2e;}
+  .tile-demo.circle .t-sym{color:#1a3a8a;}
+  .tile-demo.mwan .t-sym{font-family:'Noto Serif SC',serif;color:#8a0000;font-size:1.3rem;}
+  .tile-demo.wind .t-sym{font-family:'Noto Serif SC',serif;color:#1a1a6a;font-size:1.3rem;}
+  .tile-demo.dragon .t-sym{font-family:'Noto Serif SC',serif;font-size:1.3rem;}
+  .tile-demo.dragon.chun .t-sym{color:#c0392b;}
+  .tile-demo.dragon.haku .t-sym{color:#888;}
+  .tile-demo.dragon.hatsu .t-sym{color:#1a6a2e;}
+  .combo-box{background:rgba(201,168,76,0.08);border-left:3px solid var(--gold);padding:12px 16px;margin:10px 0;border-radius:0 6px 6px 0;}
+  .combo-box h3{color:var(--gold-light);font-size:1rem;margin-bottom:6px;}
+  .combo-box p{color:#b0c5b0;font-size:0.88rem;margin:0;}
+  .highlight{color:var(--gold-light);font-weight:600;}
+  .score-table{width:100%;border-collapse:collapse;margin:15px 0;}
+  .score-table th{background:rgba(201,168,76,0.2);color:var(--gold);padding:10px;text-align:left;font-size:0.9rem;}
+  .score-table td{padding:9px 10px;border-bottom:1px solid rgba(255,255,255,0.05);color:#c5d5c5;font-size:0.88rem;}
+  .score-table tr:hover td{background:rgba(255,255,255,0.03);}
 
-  /* ===== PAPAN PERMAINAN ===== */
-  #screen-game {
-    min-height: 100vh;
-    background: radial-gradient(ellipse at center, #1e5c38 0%, #0d2e1a 100%);
-    flex-direction: column;
-    padding: 10px;
-  }
-  .game-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 15px;
-    background: rgba(0,0,0,0.3);
-    border-radius: 8px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .game-title { font-family: 'Cinzel Decorative', serif; color: var(--gold); font-size: 0.95rem; font-weight: 400; letter-spacing: 2px; }
-  .game-info { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
-  .info-box {
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(201,168,76,0.3);
-    border-radius: 5px;
-    padding: 5px 12px;
-    font-size: 0.8rem;
-    color: var(--ivory-dark);
-    text-align: center;
-  }
-  .info-box span { display: block; color: var(--gold); font-weight: 600; font-size: 1rem; }
+  /* ===== GAME SCREEN ===== */
+  #screen-game{min-height:100vh;background:radial-gradient(ellipse at center,#1e5c38 0%,#0d2e1a 100%);flex-direction:column;padding:6px;gap:5px;}
+  
+  .game-header{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:rgba(0,0,0,0.4);border-radius:8px;flex-wrap:wrap;gap:6px;border:1px solid rgba(201,168,76,0.15);}
+  .game-title{font-family:'Cinzel Decorative',serif;color:var(--gold);font-size:0.9rem;font-weight:400;letter-spacing:2px;}
+  .game-info{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .info-box{background:rgba(0,0,0,0.5);border:1px solid rgba(201,168,76,0.3);border-radius:5px;padding:3px 10px;font-size:0.7rem;color:var(--ivory-dark);text-align:center;}
+  .info-box span{display:block;color:var(--gold);font-weight:700;font-size:0.9rem;}
 
-  /* Papan utama */
-  .game-board {
-    flex: 1;
-    display: grid;
-    grid-template-rows: auto 1fr auto auto;
-    gap: 8px;
-  }
-  .player-area {
-    background: rgba(0,0,0,0.25);
-    border-radius: 8px;
-    padding: 8px 12px;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .player-label {
-    font-size: 0.75rem;
-    color: var(--gold);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .player-label .score-badge {
-    background: rgba(201,168,76,0.2);
-    border: 1px solid var(--gold);
-    padding: 2px 10px;
-    border-radius: 10px;
-    font-size: 0.8rem;
-    color: var(--gold-light);
-  }
+  /* Dora display in header */
+  .dora-display{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,0.4);border:1px solid rgba(201,168,76,0.4);border-radius:5px;padding:3px 8px;}
+  .dora-label{font-size:0.6rem;color:var(--gold);letter-spacing:1px;text-transform:uppercase;}
+  .dora-tiles{display:flex;gap:3px;}
+  .dora-tile-mini{width:22px;height:30px;background:var(--tile-bg);border:1.5px solid var(--gold);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;box-shadow:0 0 6px rgba(201,168,76,0.4);}
+  .dora-tile-mini.bamboo{color:#1a6a2e;}
+  .dora-tile-mini.circle{color:#1a3a8a;}
+  .dora-tile-mini.mwan{font-family:'Noto Serif SC',serif;color:#8a0000;font-size:0.6rem;}
+  .dora-tile-mini.wind{font-family:'Noto Serif SC',serif;color:#1a1a6a;font-size:0.6rem;}
+  .dora-tile-mini.dragon-chun{font-family:'Noto Serif SC',serif;color:#c0392b;font-size:0.6rem;}
+  .dora-tile-mini.dragon-haku{font-family:'Noto Serif SC',serif;color:#888;font-size:0.6rem;}
+  .dora-tile-mini.dragon-hatsu{font-family:'Noto Serif SC',serif;color:#1a6a2e;font-size:0.6rem;}
 
-  /* Tangan lawan (tersembunyi) */
-  .opponent-hand {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .tile-back {
-    width: 30px;
-    height: 42px;
-    background: linear-gradient(135deg, #1a4a8a, #0d2a5c);
-    border: 2px solid #4a7ac9;
-    border-radius: 4px;
-    box-shadow: 1px 2px 4px rgba(0,0,0,0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-  }
+  /* Main board layout */
+  .game-board{flex:1;display:flex;flex-direction:column;gap:5px;min-height:0;}
 
-  /* Area tengah */
-  .middle-area {
-    display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
-    gap: 8px;
-    align-items: start;
-  }
-  .discard-pile {
-    background: rgba(0,0,0,0.2);
-    border: 1px solid rgba(201,168,76,0.15);
-    border-radius: 8px;
-    padding: 10px;
-    min-height: 150px;
-  }
-  .discard-pile h4 {
-    text-align: center;
-    color: rgba(201,168,76,0.6);
-    font-size: 0.7rem;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-  }
-  .discard-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 3px;
-    justify-content: center;
-  }
+  /* TOP OPPONENT */
+  .opp-top-area{background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 10px;}
+  .opp-top-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+  .opp-name-label{font-size:0.65rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
+  .opp-name-label .riichi-indicator{font-size:0.7rem;background:rgba(255,50,50,0.2);border:1px solid #e74c3c;padding:1px 5px;border-radius:3px;color:#ff6666;animation:pulseRed 1.5s infinite;}
+  .score-badge{background:rgba(201,168,76,0.2);border:1px solid var(--gold);padding:1px 8px;border-radius:10px;font-size:0.75rem;color:var(--gold-light);}
+  .opp-top-tiles{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;}
 
-  /* Tile kecil di discard */
-  .tile-sm {
-    width: 28px;
-    height: 38px;
-    background: var(--tile-bg);
-    border: 1.5px solid var(--tile-border);
-    border-radius: 3px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.95rem;
-    box-shadow: 1px 2px 3px rgba(0,0,0,0.4);
-    cursor: default;
-    position: relative;
-  }
-  .tile-sm.bamboo { color: #1a6a2e; }
-  .tile-sm.circle { color: #1a3a8a; }
-  .tile-sm.mwan { font-family: 'Noto Serif SC', serif; color: #8a0000; font-size: 0.75rem; }
-  .tile-sm.wind { font-family: 'Noto Serif SC', serif; color: #1a1a6a; font-size: 0.75rem; }
-  .tile-sm.dragon-chun { font-family: 'Noto Serif SC', serif; color: #c0392b; font-size: 0.75rem; }
-  .tile-sm.dragon-haku { font-family: 'Noto Serif SC', serif; color: #666; font-size: 0.75rem; }
-  .tile-sm.dragon-hatsu { font-family: 'Noto Serif SC', serif; color: #1a6a2e; font-size: 0.75rem; }
-  .tile-sm.latest { box-shadow: 0 0 8px rgba(255,215,0,0.8), 1px 2px 3px rgba(0,0,0,0.4); border-color: gold; }
+  /* MIDDLE SECTION */
+  .middle-section{flex:1;display:grid;grid-template-columns:68px 1fr 68px;gap:5px;min-height:0;}
 
-  /* Info tengah */
-  .center-info {
-    background: rgba(0,0,0,0.3);
-    border: 2px solid rgba(201,168,76,0.3);
-    border-radius: 10px;
-    padding: 15px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-height: 150px;
-  }
-  .wind-indicator {
-    font-family: 'Noto Serif SC', serif;
-    font-size: 2.5rem;
-    color: var(--gold);
-    text-shadow: 0 0 20px rgba(201,168,76,0.5);
-  }
-  .round-info { font-size: 0.75rem; color: var(--ivory-dark); letter-spacing: 1px; }
-  .wall-count {
-    background: rgba(201,168,76,0.15);
-    border: 1px solid rgba(201,168,76,0.3);
-    border-radius: 15px;
-    padding: 4px 14px;
-    font-size: 0.8rem;
-    color: var(--gold-light);
-  }
-  .drawn-tile-display {
-    background: rgba(255,255,255,0.05);
-    border: 1px dashed rgba(201,168,76,0.4);
-    border-radius: 6px;
-    padding: 8px 14px;
-    font-size: 0.75rem;
-    color: var(--ivory-dark);
-    min-width: 80px;
-  }
+  /* SIDE OPPONENTS */
+  .side-opp{background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 3px;display:flex;flex-direction:column;align-items:center;gap:4px;overflow:hidden;}
+  .side-opp-label{writing-mode:vertical-rl;font-size:0.58rem;color:var(--gold);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+  .side-opp-score{writing-mode:vertical-rl;font-size:0.6rem;color:var(--gold-light);background:rgba(201,168,76,0.15);border-radius:3px;padding:2px 1px;}
+  .side-opp-riichi{font-size:0.6rem;color:#ff6666;animation:pulseRed 1.5s infinite;writing-mode:vertical-rl;}
+  .side-tiles{display:flex;flex-direction:column;gap:2px;align-items:center;flex:1;}
+  .tile-back-side{width:26px;height:18px;background:linear-gradient(135deg,#1a4a8a,#0d2a5c);border:1.5px solid #4a7ac9;border-radius:3px;box-shadow:1px 1px 3px rgba(0,0,0,0.5);flex-shrink:0;}
+  .side-melds{display:flex;flex-direction:column;gap:3px;align-items:center;width:100%;}
+  .side-meld-set{display:flex;flex-direction:column;gap:1px;background:rgba(0,0,0,0.2);padding:2px;border-radius:3px;border:1px solid rgba(201,168,76,0.15);}
 
-  /* Tangan pemain */
-  .player-hand {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 5px 0;
-  }
+  /* CENTER BOARD */
+  .center-board{display:grid;grid-template-rows:auto 1fr auto;grid-template-columns:1fr auto 1fr;gap:4px;position:relative;}
+  .discard-area{background:rgba(0,0,0,0.2);border:1px solid rgba(201,168,76,0.12);border-radius:6px;padding:5px;}
+  .discard-area h5{text-align:center;color:rgba(201,168,76,0.5);font-size:0.6rem;letter-spacing:2px;margin-bottom:4px;font-weight:400;}
+  .discard-area-top{grid-column:1/-1;}
+  .discard-area-left{grid-column:1;grid-row:2;}
+  .center-info{grid-column:2;grid-row:2;background:rgba(0,0,0,0.35);border:2px solid rgba(201,168,76,0.3);border-radius:10px;padding:8px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:90px;}
+  .discard-area-right{grid-column:3;grid-row:2;}
+  .discard-area-bottom{grid-column:1/-1;grid-row:3;}
+  .discard-grid{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;}
+  .wind-indicator{font-family:'Noto Serif SC',serif;font-size:2rem;color:var(--gold);text-shadow:0 0 15px rgba(201,168,76,0.5);}
+  .round-info{font-size:0.65rem;color:var(--ivory-dark);letter-spacing:1px;}
+  .wall-count{background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);border-radius:12px;padding:2px 10px;font-size:0.7rem;color:var(--gold-light);}
+  .drawn-info{background:rgba(255,255,255,0.04);border:1px dashed rgba(201,168,76,0.3);border-radius:5px;padding:3px 8px;font-size:0.65rem;color:var(--ivory-dark);}
 
-  /* Tile utama pemain */
-  .tile-main {
-    width: 48px;
-    height: 65px;
-    background: linear-gradient(180deg, #fffef8 0%, #fdf6e3 100%);
-    border: 2px solid var(--tile-border);
-    border-radius: 6px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 2px 4px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.9);
-    transition: all 0.15s ease;
-    position: relative;
-    user-select: none;
-  }
-  .tile-main:hover { transform: translateY(-8px); box-shadow: 2px 10px 20px rgba(0,0,0,0.6); }
-  .tile-main.selected {
-    transform: translateY(-12px);
-    border-color: #e74c3c;
-    box-shadow: 0 0 12px rgba(231,76,60,0.7), 2px 12px 20px rgba(0,0,0,0.6);
-  }
-  .tile-main.new-tile {
-    animation: newTilePop 0.4s ease;
-    border-color: #27ae60;
-    box-shadow: 0 0 12px rgba(39,174,96,0.6), 2px 4px 8px rgba(0,0,0,0.5);
-  }
-  @keyframes newTilePop {
-    0% { transform: translateY(-30px) scale(0.8); opacity: 0; }
-    60% { transform: translateY(5px) scale(1.05); }
-    100% { transform: translateY(0) scale(1); }
-  }
-  .tile-main .t-sym { font-size: 1.7rem; line-height: 1; }
-  .tile-main .t-num { font-size: 0.7rem; position: absolute; top: 2px; left: 4px; font-weight: 700; }
-  .tile-main.bamboo .t-sym { color: #1a6a2e; }
-  .tile-main.bamboo .t-num { color: #1a6a2e; }
-  .tile-main.circle .t-sym { color: #1a3a8a; }
-  .tile-main.circle .t-num { color: #1a3a8a; }
-  .tile-main.mwan .t-sym { font-family: 'Noto Serif SC', serif; color: #8a0000; font-size: 1.3rem; }
-  .tile-main.mwan .t-num { color: #8a0000; }
-  .tile-main.wind .t-sym { font-family: 'Noto Serif SC', serif; color: #1a1a6a; font-size: 1.3rem; }
-  .tile-main.dragon-chun .t-sym { font-family: 'Noto Serif SC', serif; color: #c0392b; font-size: 1.3rem; }
-  .tile-main.dragon-haku .t-sym { font-family: 'Noto Serif SC', serif; color: #888; font-size: 1.3rem; }
-  .tile-main.dragon-hatsu .t-sym { font-family: 'Noto Serif SC', serif; color: #1a6a2e; font-size: 1.3rem; }
+  /* Riichi sticks in center */
+  .riichi-sticks{display:flex;flex-direction:column;gap:2px;align-items:center;}
+  .riichi-stick{width:50px;height:5px;background:linear-gradient(90deg,#fff,#ffe,#fff);border-radius:3px;box-shadow:0 0 4px rgba(255,255,200,0.6);border:1px solid rgba(201,168,76,0.5);}
+  .riichi-bets-label{font-size:0.6rem;color:rgba(255,255,200,0.7);}
 
-  /* Meld area */
-  .meld-area {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 6px;
-  }
-  .meld-set {
-    display: flex;
-    gap: 2px;
-    background: rgba(0,0,0,0.2);
-    padding: 3px;
-    border-radius: 4px;
-    border: 1px solid rgba(201,168,76,0.2);
-  }
+  /* Tile small */
+  .tile-sm{width:24px;height:33px;background:var(--tile-bg);border:1.5px solid var(--tile-border);border-radius:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:0.8rem;box-shadow:1px 2px 3px rgba(0,0,0,0.4);cursor:default;position:relative;}
+  .tile-sm.bamboo{color:#1a6a2e;}
+  .tile-sm.circle{color:#1a3a8a;}
+  .tile-sm.mwan{font-family:'Noto Serif SC',serif;color:#8a0000;font-size:0.65rem;}
+  .tile-sm.wind{font-family:'Noto Serif SC',serif;color:#1a1a6a;font-size:0.65rem;}
+  .tile-sm.dragon-chun{font-family:'Noto Serif SC',serif;color:#c0392b;font-size:0.65rem;}
+  .tile-sm.dragon-haku{font-family:'Noto Serif SC',serif;color:#666;font-size:0.65rem;}
+  .tile-sm.dragon-hatsu{font-family:'Noto Serif SC',serif;color:#1a6a2e;font-size:0.65rem;}
+  .tile-sm.latest{box-shadow:0 0 6px rgba(255,215,0,0.8),1px 2px 3px rgba(0,0,0,0.4);border-color:gold;}
 
-  /* Action buttons */
-  .action-bar {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-    padding: 8px;
-    background: rgba(0,0,0,0.25);
-    border-radius: 8px;
-  }
-  .action-btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-family: 'Noto Sans', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    letter-spacing: 0.3px;
-  }
-  .action-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
-  .btn-discard { background: linear-gradient(135deg, #8b0000, #c0392b); color: white; }
-  .btn-discard:hover:not(:disabled) { background: linear-gradient(135deg, #c0392b, #e74c3c); transform: translateY(-2px); }
-  .btn-chi { background: linear-gradient(135deg, #1a4a8a, #2980b9); color: white; }
-  .btn-chi:hover:not(:disabled) { transform: translateY(-2px); }
-  .btn-pon { background: linear-gradient(135deg, #6a1a8a, #8e44ad); color: white; }
-  .btn-pon:hover:not(:disabled) { transform: translateY(-2px); }
-  .btn-kan { background: linear-gradient(135deg, #5a4a0a, #d4ac0d); color: #1a0a00; }
-  .btn-kan:hover:not(:disabled) { transform: translateY(-2px); }
-  .btn-win { background: linear-gradient(135deg, #1a6a2e, #27ae60); color: white; animation: pulseGreen 1.5s ease-in-out infinite; }
-  @keyframes pulseGreen {
-    0%,100% { box-shadow: 0 0 8px rgba(39,174,96,0.5); }
-    50% { box-shadow: 0 0 20px rgba(39,174,96,0.9); }
-  }
-  .btn-draw { background: linear-gradient(135deg, #5a3a0a, #c0842b); color: white; }
-  .btn-draw:hover:not(:disabled) { transform: translateY(-2px); }
+  /* Meld */
+  .meld-area{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+  .meld-set{display:flex;gap:2px;background:rgba(0,0,0,0.2);padding:2px;border-radius:4px;border:1px solid rgba(201,168,76,0.2);}
 
-  /* Log messages */
-  .game-log {
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 0.8rem;
-    color: #a0b5a0;
-    max-height: 60px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
-  .log-entry { padding: 1px 0; }
-  .log-entry.important { color: var(--gold-light); font-weight: 600; }
-  .log-entry.win { color: #2ecc71; font-weight: 700; font-size: 0.9rem; }
-  .log-entry.error { color: #e74c3c; }
+  /* PLAYER AREA */
+  .player-area{background:rgba(30,92,56,0.3);border:1px solid rgba(201,168,76,0.3);border-radius:8px;padding:6px 10px;}
+  .player-label{font-size:0.7rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:4px;}
+  .player-hand{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;padding:3px 0;}
+
+  /* Tile main player */
+  .tile-main{width:44px;height:60px;background:linear-gradient(180deg,#fffef8 0%,#fdf6e3 100%);border:2px solid var(--tile-border);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:2px 4px 8px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.9);transition:all 0.15s ease;position:relative;user-select:none;}
+  .tile-main:hover{transform:translateY(-6px);box-shadow:2px 8px 16px rgba(0,0,0,0.6);}
+  .tile-main.selected{transform:translateY(-10px);border-color:#e74c3c;box-shadow:0 0 12px rgba(231,76,60,0.7),2px 10px 18px rgba(0,0,0,0.6);}
+  .tile-main.new-tile{animation:newTilePop 0.4s ease;border-color:#27ae60;box-shadow:0 0 12px rgba(39,174,96,0.6),2px 4px 8px rgba(0,0,0,0.5);}
+  .tile-main.riichi-locked{cursor:not-allowed;opacity:0.7;}
+  @keyframes newTilePop{0%{transform:translateY(-30px) scale(0.8);opacity:0;}60%{transform:translateY(5px) scale(1.05);}100%{transform:translateY(0) scale(1);}}
+  .tile-main .t-sym{font-size:1.5rem;line-height:1;}
+  .tile-main .t-num{font-size:0.65rem;position:absolute;top:2px;left:3px;font-weight:700;}
+  .tile-main.bamboo .t-sym{color:#1a6a2e;}.tile-main.bamboo .t-num{color:#1a6a2e;}
+  .tile-main.circle .t-sym{color:#1a3a8a;}.tile-main.circle .t-num{color:#1a3a8a;}
+  .tile-main.mwan .t-sym{font-family:'Noto Serif SC',serif;color:#8a0000;font-size:1.2rem;}.tile-main.mwan .t-num{color:#8a0000;}
+  .tile-main.wind .t-sym{font-family:'Noto Serif SC',serif;color:#1a1a6a;font-size:1.2rem;}
+  .tile-main.dragon-chun .t-sym{font-family:'Noto Serif SC',serif;color:#c0392b;font-size:1.2rem;}
+  .tile-main.dragon-haku .t-sym{font-family:'Noto Serif SC',serif;color:#888;font-size:1.2rem;}
+  .tile-main.dragon-hatsu .t-sym{font-family:'Noto Serif SC',serif;color:#1a6a2e;font-size:1.2rem;}
+
+  /* Tile back (top opp) */
+  .tile-back{width:28px;height:38px;background:linear-gradient(135deg,#1a4a8a,#0d2a5c);border:2px solid #4a7ac9;border-radius:4px;box-shadow:1px 2px 4px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;font-size:0.8rem;}
+  .tile-back.riichi-tile{border-color:#e74c3c;transform:rotate(90deg);transform-origin:center;margin:0 10px;}
+
+  /* Action bar */
+  .action-section{display:flex;flex-direction:column;gap:4px;}
+  .action-bar{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:6px;background:rgba(0,0,0,0.3);border-radius:8px;}
+  .action-btn{padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-family:'Noto Sans',sans-serif;font-size:0.8rem;font-weight:600;transition:all 0.2s;letter-spacing:0.3px;}
+  .action-btn:disabled{opacity:0.3;cursor:not-allowed;transform:none!important;}
+  .btn-draw{background:linear-gradient(135deg,#5a3a0a,#c0842b);color:white;}
+  .btn-draw:hover:not(:disabled){transform:translateY(-2px);}
+  .btn-discard{background:linear-gradient(135deg,#8b0000,#c0392b);color:white;}
+  .btn-discard:hover:not(:disabled){background:linear-gradient(135deg,#c0392b,#e74c3c);transform:translateY(-2px);}
+  .btn-chi{background:linear-gradient(135deg,#1a4a8a,#2980b9);color:white;}
+  .btn-chi:hover:not(:disabled){transform:translateY(-2px);}
+  .btn-pon{background:linear-gradient(135deg,#6a1a8a,#8e44ad);color:white;}
+  .btn-pon:hover:not(:disabled){transform:translateY(-2px);}
+  .btn-kan{background:linear-gradient(135deg,#5a4a0a,#d4ac0d);color:#1a0a00;}
+  .btn-kan:hover:not(:disabled){transform:translateY(-2px);}
+  .btn-riichi{background:linear-gradient(135deg,#7a1a1a,#c0392b,#e74c3c);color:white;font-weight:700;letter-spacing:1px;animation:pulseRiichi 1.5s ease-in-out infinite;}
+  @keyframes pulseRiichi{0%,100%{box-shadow:0 0 6px rgba(231,76,60,0.4);}50%{box-shadow:0 0 16px rgba(231,76,60,0.9),0 0 30px rgba(231,76,60,0.4);}}
+  .btn-riichi:hover:not(:disabled){transform:translateY(-2px) scale(1.05);}
+  .btn-ron{background:linear-gradient(135deg,#8b0000,#e74c3c);color:white;animation:pulseRed 1.5s ease-in-out infinite;}
+  @keyframes pulseRed{0%,100%{box-shadow:0 0 8px rgba(231,76,60,0.5);}50%{box-shadow:0 0 20px rgba(231,76,60,0.9);}}
+  .btn-win{background:linear-gradient(135deg,#1a6a2e,#27ae60);color:white;animation:pulseGreen 1.5s ease-in-out infinite;}
+  @keyframes pulseGreen{0%,100%{box-shadow:0 0 8px rgba(39,174,96,0.5);}50%{box-shadow:0 0 20px rgba(39,174,96,0.9);}}
+
+  /* Tenpai display */
+  .tenpai-bar{background:rgba(0,0,0,0.4);border:1px solid rgba(39,174,96,0.4);border-radius:6px;padding:4px 10px;display:none;align-items:center;gap:6px;flex-wrap:wrap;}
+  .tenpai-bar.show{display:flex;}
+  .tenpai-label{font-size:0.65rem;color:#2ecc71;letter-spacing:1px;white-space:nowrap;}
+  .tenpai-tiles{display:flex;gap:3px;flex-wrap:wrap;}
+  .wait-tile{width:22px;height:30px;background:var(--tile-bg);border:1.5px solid #27ae60;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;box-shadow:0 0 4px rgba(39,174,96,0.4);}
+  .wait-tile.bamboo{color:#1a6a2e;}
+  .wait-tile.circle{color:#1a3a8a;}
+  .wait-tile.mwan{font-family:'Noto Serif SC',serif;color:#8a0000;font-size:0.55rem;}
+  .wait-tile.wind{font-family:'Noto Serif SC',serif;color:#1a1a6a;font-size:0.55rem;}
+  .wait-tile.dragon-chun{font-family:'Noto Serif SC',serif;color:#c0392b;font-size:0.55rem;}
+  .wait-tile.dragon-haku{font-family:'Noto Serif SC',serif;color:#666;font-size:0.55rem;}
+  .wait-tile.dragon-hatsu{font-family:'Noto Serif SC',serif;color:#1a6a2e;font-size:0.55rem;}
+
+  /* Game log */
+  .game-log{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:5px 10px;font-size:0.72rem;color:#a0b5a0;max-height:55px;overflow-y:auto;scrollbar-width:thin;}
+  .log-entry{padding:1px 0;}
+  .log-entry.important{color:var(--gold-light);font-weight:600;}
+  .log-entry.win{color:#2ecc71;font-weight:700;font-size:0.8rem;}
+  .log-entry.error{color:#e74c3c;}
+  .log-entry.riichi{color:#ff8888;font-weight:600;}
 
   /* Modal */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    backdrop-filter: blur(4px);
-  }
-  .modal-overlay.active { display: flex; }
-  .modal-box {
-    background: linear-gradient(135deg, #0d2e1a, #1a4a2e);
-    border: 2px solid var(--gold);
-    border-radius: 12px;
-    padding: 30px 40px;
-    max-width: 500px;
-    width: 90%;
-    text-align: center;
-    box-shadow: 0 0 50px rgba(201,168,76,0.3);
-  }
-  .modal-box h2 { font-family: 'Cinzel Decorative', serif; color: var(--gold); margin-bottom: 15px; font-size: 1.5rem; }
-  .modal-box p { color: var(--ivory-dark); margin-bottom: 20px; line-height: 1.7; }
-  .win-score { font-size: 3rem; color: var(--gold); font-family: 'Cinzel Decorative', serif; margin: 10px 0; text-shadow: 0 0 20px rgba(201,168,76,0.5); }
-  .win-hands { color: #90c090; font-size: 0.9rem; margin-bottom: 20px; }
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px);}
+  .modal-overlay.active{display:flex;}
+  .modal-box{background:linear-gradient(135deg,#0d2e1a,#1a4a2e);border:2px solid var(--gold);border-radius:12px;padding:28px 36px;max-width:500px;width:90%;text-align:center;box-shadow:0 0 50px rgba(201,168,76,0.3);}
+  .modal-box h2{font-family:'Cinzel Decorative',serif;color:var(--gold);margin-bottom:12px;font-size:1.4rem;}
+  .modal-box p{color:var(--ivory-dark);margin-bottom:18px;line-height:1.7;}
+  .win-score{font-size:2.8rem;color:var(--gold);font-family:'Cinzel Decorative',serif;margin:8px 0;text-shadow:0 0 20px rgba(201,168,76,0.5);}
+  .win-hands{color:#90c090;font-size:0.85rem;margin-bottom:18px;}
 
-  /* Notif floating */
-  .floating-notif {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(201,168,76,0.95);
-    color: #1a0a00;
-    padding: 10px 25px;
-    border-radius: 25px;
-    font-weight: 700;
-    font-size: 1rem;
-    z-index: 999;
-    display: none;
-    animation: slideDown 0.3s ease;
-  }
-  @keyframes slideDown {
-    from { top: -40px; opacity: 0; }
-    to { top: 20px; opacity: 1; }
-  }
+  /* Floating notif */
+  .floating-notif{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(201,168,76,0.95);color:#1a0a00;padding:10px 25px;border-radius:25px;font-weight:700;font-size:1rem;z-index:999;display:none;animation:slideDown 0.3s ease;}
+  @keyframes slideDown{from{top:-40px;opacity:0;}to{top:20px;opacity:1;}}
 
   /* Responsive */
-  @media (max-width: 600px) {
-    .tile-main { width: 38px; height: 52px; }
-    .tile-main .t-sym { font-size: 1.3rem; }
-    .middle-area { grid-template-columns: 1fr; }
-    .tile-grid { grid-template-columns: repeat(auto-fill, minmax(55px, 1fr)); }
+  @media(max-width:600px){
+    .tile-main{width:36px;height:50px;}.tile-main .t-sym{font-size:1.2rem;}
+    .middle-section{grid-template-columns:56px 1fr 56px;}
+    .side-tiles .tile-back-side{width:22px;height:15px;}
   }
 </style>
 </head>
 <body>
-
-<!-- Floating notification -->
 <div class="floating-notif" id="floatNotif"></div>
 
-<!-- ===== LAYAR JUDUL ===== -->
+<!-- ===== TITLE ===== -->
 <div id="screen-title" class="screen active">
   <div class="title-main">Mahjong</div>
   <div class="title-chinese">麻将</div>
-  <div class="title-sub">Simulator · Bahasa Indonesia</div>
+  <div class="title-sub">Simulator Riichi · Bahasa Indonesia</div>
   <div style="display:flex;flex-wrap:wrap;justify-content:center;">
     <button class="btn-gold" id="btn-start-game">Mulai Bermain</button>
     <button class="btn-green" id="btn-go-tutorial">Lihat Tutorial</button>
   </div>
 </div>
 
-<!-- ===== LAYAR TUTORIAL ===== -->
+<!-- ===== TUTORIAL ===== -->
 <div id="screen-tutorial" class="screen">
   <div class="tutorial-header">
     <h1>Panduan Bermain Mahjong</h1>
-    <p style="color:#a0b5a0;font-size:0.9rem;margin-top:8px;">Semua yang perlu kamu tahu sebelum bermain</p>
+    <p style="color:#a0b5a0;font-size:0.9rem;margin-top:8px;">Semua yang perlu kamu tahu</p>
   </div>
   <div class="tut-tabs">
     <div class="tut-tab active" data-tab="pengenalan">Pengenalan</div>
-    <div class="tut-tab" data-tab="tile-suit">Tile Suit</div>
-    <div class="tut-tab" data-tab="tile-spesial">Tile Spesial</div>
+    <div class="tut-tab" data-tab="tile-suit">Tile</div>
     <div class="tut-tab" data-tab="kombinasi">Kombinasi</div>
     <div class="tut-tab" data-tab="cara-main">Cara Main</div>
-    <div class="tut-tab" data-tab="skor">Skor & Menang</div>
+    <div class="tut-tab" data-tab="riichi">Riichi & Dora</div>
+    <div class="tut-tab" data-tab="skor">Skor</div>
   </div>
 
-  <!-- TAB: Pengenalan -->
-  <div id="tut-pengenalan" class="tut-content active">
+  <div id="tut-pengenalan" class="tut-content active" style="max-width:900px;margin:0 auto;">
     <div class="tut-section">
-      <h2>🀄 Apa itu Mahjong?</h2>
-      <p>Mahjong (麻将) adalah permainan papan asal Tiongkok yang dimainkan oleh <span class="highlight">4 pemain</span>. Permainan ini menggunakan set tile khusus dan menggabungkan strategi, keberuntungan, dan keterampilan menghitung.</p>
-      <p>Tujuan permainan: <span class="highlight">kumpulkan 14 tile</span> yang membentuk kombinasi menang — biasanya terdiri dari 4 set (triplet/urutan) + 1 pasang.</p>
-      <p>Set lengkap Mahjong terdiri dari <span class="highlight">136 tile</span> (144 dengan tile bunga). Setiap pemain mendapat <span class="highlight">13 tile</span> awal.</p>
+      <h2>🀄 Mahjong Riichi</h2>
+      <p>Mahjong (麻将) adalah permainan 4 pemain dari Tiongkok. Simulator ini mengimplementasikan aturan <span class="highlight">Riichi Mahjong (麻雀)</span> — versi Jepang yang paling populer di dunia.</p>
+      <p>Tujuan: <span class="highlight">kumpulkan 14 tile</span> yang membentuk kombinasi menang (4 set + 1 pasang). Set lengkap = <span class="highlight">136 tile</span>. Setiap pemain mendapat 13 tile awal.</p>
     </div>
     <div class="tut-section">
       <h2>🌬️ Angin & Putaran</h2>
-      <p>Permainan dibagi dalam <span class="highlight">4 putaran</span> (Timur, Selatan, Barat, Utara). Setiap pemain mendapat giliran sebagai <span class="highlight">Dealer (Bankir)</span>.</p>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:15px 0;">
-        <div class="tile-demo wind"><div class="t-sym">東</div><div class="t-label">Timur 東</div></div>
-        <div class="tile-demo wind"><div class="t-sym">南</div><div class="t-label">Selatan 南</div></div>
-        <div class="tile-demo wind"><div class="t-sym">西</div><div class="t-label">Barat 西</div></div>
-        <div class="tile-demo wind"><div class="t-sym">北</div><div class="t-label">Utara 北</div></div>
-      </div>
-      <p>Dealer memulai permainan dan membuang tile pertama. Giliran berputar <span class="highlight">berlawanan arah jarum jam</span>.</p>
+      <p>Permainan berlangsung dalam putaran. Setiap ronde ada angin putaran (Timur, Selatan, dll). Pemain bergiliran searah berlawanan jarum jam: Timur → Selatan → Barat → Utara.</p>
     </div>
   </div>
 
-  <!-- TAB: Tile Suit -->
-  <div id="tut-tile-suit" class="tut-content">
+  <div id="tut-tile-suit" class="tut-content" style="max-width:900px;margin:0 auto;">
     <div class="tut-section">
-      <h2>🎋 Bambu (Bamboo / 竹)</h2>
-      <p>Ada <span class="highlight">9 tile bambu</span> bernomor 1–9. Tile Bambu 1 digambarkan sebagai burung (biasanya Burung Merak). Tile 2–9 digambarkan sebagai batang bambu.</p>
+      <h2>🎋 Bambu · 🔵 Lingkaran · 🈵 Wan</h2>
+      <p>3 suit bernomor 1–9, masing-masing ada 4 salinan (total 108 tile suit).</p>
       <div class="tile-grid">
         <div class="tile-demo bamboo"><div class="t-sym">🎋</div><div class="t-label">1 Bambu</div></div>
-        <div class="tile-demo bamboo"><div class="t-sym">🀐</div><div class="t-label">2 Bambu</div></div>
-        <div class="tile-demo bamboo"><div class="t-sym">🀑</div><div class="t-label">3 Bambu</div></div>
-        <div class="tile-demo bamboo"><div class="t-sym">🀒</div><div class="t-label">4 Bambu</div></div>
-        <div class="tile-demo bamboo"><div class="t-sym">🀓</div><div class="t-label">5 Bambu</div></div>
-        <div class="tile-demo bamboo"><div class="t-sym">🀔</div><div class="t-label">6 Bambu</div></div>
-        <div class="tile-demo bamboo"><div class="t-sym">🀕</div><div class="t-label">7 Bambu</div></div>
-        <div class="tile-demo bamboo"><div class="t-sym">🀖</div><div class="t-label">8 Bambu</div></div>
-        <div class="tile-demo bamboo"><div class="t-sym">🀗</div><div class="t-label">9 Bambu</div></div>
-      </div>
-      <p>Dalam set lengkap ada <span class="highlight">4 salinan</span> tiap tile (total 36 tile bambu).</p>
-    </div>
-    <div class="tut-section">
-      <h2>🔵 Lingkaran (Circle / 筒)</h2>
-      <p>Ada <span class="highlight">9 tile lingkaran</span> bernomor 1–9, digambarkan sebagai koin/lingkaran.</p>
-      <div class="tile-grid">
+        <div class="tile-demo bamboo"><div class="t-sym">🀐</div><div class="t-label">2–9 Bambu</div></div>
         <div class="tile-demo circle"><div class="t-sym">🀙</div><div class="t-label">1 Lingkaran</div></div>
-        <div class="tile-demo circle"><div class="t-sym">🀚</div><div class="t-label">2 Lingkaran</div></div>
-        <div class="tile-demo circle"><div class="t-sym">🀛</div><div class="t-label">3 Lingkaran</div></div>
         <div class="tile-demo circle"><div class="t-sym">🀜</div><div class="t-label">4 Lingkaran</div></div>
-        <div class="tile-demo circle"><div class="t-sym">🀝</div><div class="t-label">5 Lingkaran</div></div>
-        <div class="tile-demo circle"><div class="t-sym">🀞</div><div class="t-label">6 Lingkaran</div></div>
-        <div class="tile-demo circle"><div class="t-sym">🀟</div><div class="t-label">7 Lingkaran</div></div>
-        <div class="tile-demo circle"><div class="t-sym">🀠</div><div class="t-label">8 Lingkaran</div></div>
-        <div class="tile-demo circle"><div class="t-sym">🀡</div><div class="t-label">9 Lingkaran</div></div>
-      </div>
-    </div>
-    <div class="tut-section">
-      <h2>🈵 Karakter/Wan (Man / 万子)</h2>
-      <p>Ada <span class="highlight">9 tile karakter</span> bernomor 1–9. Ditandai dengan karakter Cina untuk angka plus karakter 萬 (sepuluh ribu).</p>
-      <div class="tile-grid">
         <div class="tile-demo mwan"><div class="t-sym">一萬</div><div class="t-label">1 Wan</div></div>
-        <div class="tile-demo mwan"><div class="t-sym">二萬</div><div class="t-label">2 Wan</div></div>
-        <div class="tile-demo mwan"><div class="t-sym">三萬</div><div class="t-label">3 Wan</div></div>
-        <div class="tile-demo mwan"><div class="t-sym">四萬</div><div class="t-label">4 Wan</div></div>
         <div class="tile-demo mwan"><div class="t-sym">五萬</div><div class="t-label">5 Wan</div></div>
-        <div class="tile-demo mwan"><div class="t-sym">六萬</div><div class="t-label">6 Wan</div></div>
-        <div class="tile-demo mwan"><div class="t-sym">七萬</div><div class="t-label">7 Wan</div></div>
-        <div class="tile-demo mwan"><div class="t-sym">八萬</div><div class="t-label">8 Wan</div></div>
-        <div class="tile-demo mwan"><div class="t-sym">九萬</div><div class="t-label">9 Wan</div></div>
+      </div>
+    </div>
+    <div class="tut-section">
+      <h2>🌬️ Angin · 🐉 Naga (Honor Tiles)</h2>
+      <div class="tile-grid">
+        <div class="tile-demo wind"><div class="t-sym">東</div><div class="t-label">Timur</div></div>
+        <div class="tile-demo wind"><div class="t-sym">南</div><div class="t-label">Selatan</div></div>
+        <div class="tile-demo wind"><div class="t-sym">西</div><div class="t-label">Barat</div></div>
+        <div class="tile-demo wind"><div class="t-sym">北</div><div class="t-label">Utara</div></div>
+        <div class="tile-demo dragon chun"><div class="t-sym">中</div><div class="t-label">Chun</div></div>
+        <div class="tile-demo dragon hatsu"><div class="t-sym">發</div><div class="t-label">Hatsu</div></div>
+        <div class="tile-demo dragon haku"><div class="t-sym">白</div><div class="t-label">Haku</div></div>
       </div>
     </div>
   </div>
 
-  <!-- TAB: Tile Spesial -->
-  <div id="tut-tile-spesial" class="tut-content">
-    <div class="tut-section">
-      <h2>🌬️ Tile Angin (Wind Tiles / 風牌)</h2>
-      <p>Ada <span class="highlight">4 tile angin</span>, masing-masing ada 4 salinan (total 16 tile). Tile angin menambah bonus skor bila sesuai dengan angin ronde atau angin pemain.</p>
-      <div class="tile-grid" style="max-width:350px;">
-        <div class="tile-demo wind"><div class="t-sym">東</div><div class="t-label">Timur (Ton)</div></div>
-        <div class="tile-demo wind"><div class="t-sym">南</div><div class="t-label">Selatan (Nan)</div></div>
-        <div class="tile-demo wind"><div class="t-sym">西</div><div class="t-label">Barat (Sha)</div></div>
-        <div class="tile-demo wind"><div class="t-sym">北</div><div class="t-label">Utara (Pei)</div></div>
-      </div>
-      <p>Triplet angin yang cocok dengan <span class="highlight">angin putaran saat ini</span> memberikan 2 poin bonus.</p>
-    </div>
-    <div class="tut-section">
-      <h2>🐉 Tile Naga (Dragon Tiles / 三元牌)</h2>
-      <p>Ada <span class="highlight">3 tile naga</span>, masing-masing ada 4 salinan (total 12 tile). Setiap triplet naga memberikan <span class="highlight">1 poin yaku</span>.</p>
-      <div class="tile-grid" style="max-width:280px;">
-        <div class="tile-demo dragon chun"><div class="t-sym">中</div><div class="t-label">Chun (Merah)</div></div>
-        <div class="tile-demo dragon haku"><div class="t-sym">白</div><div class="t-label">Haku (Putih)</div></div>
-        <div class="tile-demo dragon hatsu"><div class="t-sym">發</div><div class="t-label">Hatsu (Hijau)</div></div>
-      </div>
-      <div class="combo-box"><h3>💡 Catatan Naga</h3><p><b>中 (Chun)</b> = Merah, melambangkan Tengah/Sukses · <b>白 (Haku)</b> = Putih, melambangkan Kemurnian · <b>發 (Hatsu)</b> = Hijau, melambangkan Kemakmuran</p></div>
-    </div>
-    <div class="tut-section">
-      <h2>🌸 Tile Bunga & Musim (Opsional)</h2>
-      <p>Ada <span class="highlight">8 tile bonus</span>: 4 Bunga (梅蘭菊竹) dan 4 Musim (春夏秋冬). Tile ini <span class="highlight">tidak digunakan</span> dalam set dasar simulator ini, tapi umum dalam versi Mahjong regional tertentu.</p>
-    </div>
-  </div>
-
-  <!-- TAB: Kombinasi -->
-  <div id="tut-kombinasi" class="tut-content">
+  <div id="tut-kombinasi" class="tut-content" style="max-width:900px;margin:0 auto;">
     <div class="tut-section">
       <h2>🃏 Jenis Kombinasi (Set)</h2>
-      <div class="combo-box">
-        <h3>🀇 Chow / Urutan (順子 Shùnzi)</h3>
-        <p>3 tile berurutan dari suit yang SAMA. Contoh: 3🎋 4🎋 5🎋 atau 7🀙 8🀙 9🀙. Hanya bisa diambil dari pemain <b>kiri</b> (Chi).</p>
-      </div>
-      <div class="combo-box">
-        <h3>🀇 Pung / Triplet (刻子 Kèzi)</h3>
-        <p>3 tile IDENTIK. Contoh: 東東東 atau 中中中. Bisa diambil dari pemain mana saja (Pon). Bernilai lebih tinggi dari Chow.</p>
-      </div>
-      <div class="combo-box">
-        <h3>🀇 Kong / Quad (槓子 Gàngzi)</h3>
-        <p>4 tile IDENTIK. Setelah membentuk Kong, pemain mengambil 1 tile ekstra dari dinding. Nilainya sangat tinggi (Kan).</p>
-      </div>
-      <div class="combo-box">
-        <h3>🀇 Pair / Pasangan (雀頭 Quètóu)</h3>
-        <p>2 tile IDENTIK. Setiap tangan menang membutuhkan <b>tepat 1 pasangan</b> sebagai "mata" (kepala).</p>
-      </div>
+      <div class="combo-box"><h3>Chi / Urutan (順子)</h3><p>3 tile berurutan, suit sama. Contoh: 3🎋 4🎋 5🎋. Hanya dari pemain kiri.</p></div>
+      <div class="combo-box"><h3>Pon / Triplet (刻子)</h3><p>3 tile identik. Dari pemain mana saja.</p></div>
+      <div class="combo-box"><h3>Kan / Quad (槓子)</h3><p>4 tile identik. Dapat tile bonus dari Dead Wall!</p></div>
+      <div class="combo-box"><h3>Pasangan (雀頭)</h3><p>2 tile identik. Setiap tangan menang butuh tepat 1 pasangan sebagai "kepala".</p></div>
     </div>
     <div class="tut-section">
-      <h2>🏆 Tangan Menang Standar</h2>
-      <p>Tangan menang standar terdiri dari <span class="highlight">14 tile</span> yang membentuk:</p>
-      <p style="text-align:center;font-size:1.1rem;color:var(--gold-light);padding:10px;background:rgba(201,168,76,0.1);border-radius:6px;margin:10px 0;">
-        4 Set (Chow/Pung/Kong) + 1 Pasangan
-      </p>
-      <div class="combo-box">
-        <h3>🌟 Tangan Spesial: Tujuh Pasang (七対子)</h3>
-        <p>7 pasangan tile berbeda. Tidak butuh set — murni pasangan! Nilainya tinggi.</p>
-      </div>
-      <div class="combo-box">
-        <h3>🌟 Tangan Spesial: Kokushi Musou (十三幺)</h3>
-        <p>Semua tile terminal dan kehormatan: 1🎋 9🎋 1🔵 9🔵 1萬 9萬 + semua 7 tile kehormatan + 1 duplikat. Tangan paling langka dan bernilai tertinggi!</p>
-      </div>
+      <h2>🏆 Tangan Menang</h2>
+      <p style="text-align:center;font-size:1.1rem;color:var(--gold-light);padding:10px;background:rgba(201,168,76,0.1);border-radius:6px;margin:10px 0;">4 Set (Chi/Pon/Kan) + 1 Pasangan = MENANG!</p>
+      <div class="combo-box"><h3>🌟 Tujuh Pasang (七対子)</h3><p>7 pasangan tile berbeda. Bernilai 2 Han.</p></div>
     </div>
   </div>
 
-  <!-- TAB: Cara Main -->
-  <div id="tut-cara-main" class="tut-content">
+  <div id="tut-cara-main" class="tut-content" style="max-width:900px;margin:0 auto;">
     <div class="tut-section">
       <h2>🎮 Alur Permainan</h2>
-      <p>1️⃣ <span class="highlight">Bagikan tile</span>: Setiap pemain mendapat 13 tile, dealer mendapat 14 tile dan langsung membuang 1.</p>
-      <p>2️⃣ <span class="highlight">Giliran berlanjut</span>: Pemain aktif mengambil 1 tile dari dinding (Draw), lalu membuang 1 tile.</p>
-      <p>3️⃣ <span class="highlight">Klaim tile buangan</span>: Pemain lain bisa mengklaim tile yang dibuang dengan Chi/Pon/Kan.</p>
-      <p>4️⃣ <span class="highlight">Menang</span>: Pemain yang pertama melengkapi tangan menang memenangkan ronde.</p>
+      <p>1️⃣ <span class="highlight">Bagikan tile</span>: Setiap pemain 13 tile. Dealer (kamu) dapat 14 tile.</p>
+      <p>2️⃣ <span class="highlight">Giliran</span>: Klik AMBIL untuk draw dari dinding, lalu pilih tile dan klik BUANG.</p>
+      <p>3️⃣ <span class="highlight">Klaim</span>: Setelah lawan buang tile — Chi, Pon, atau Kan bila bisa.</p>
+      <p>4️⃣ <span class="highlight">Menang</span>: TSUMO (dari dinding) atau RON (dari buangan lawan).</p>
     </div>
     <div class="tut-section">
-      <h2>🔧 Aksi dalam Permainan</h2>
-      <div class="combo-box">
-        <h3>📥 DRAW (Ambil Tile)</h3>
-        <p>Di giliran kamu, klik DRAW untuk mengambil tile dari dinding. Tile baru akan muncul berwarna hijau.</p>
-      </div>
-      <div class="combo-box">
-        <h3>🗑️ BUANG (Discard)</h3>
-        <p>Pilih tile di tangan kamu (tile menjadi merah), lalu klik BUANG untuk membuangnya ke tumpukan.</p>
-      </div>
-      <div class="combo-box">
-        <h3>🍜 CHI (Urutan dari Kiri)</h3>
-        <p>Setelah pemain kiri membuang tile, kamu bisa CHI jika tile itu melengkapi urutan di tanganmu. Tombol CHI aktif otomatis bila memungkinkan.</p>
-      </div>
-      <div class="combo-box">
-        <h3>🀄 PON (Triplet)</h3>
-        <p>Bila tile yang dibuang cocok dengan 2 tile sama di tanganmu, klik PON untuk membentuk triplet terbuka.</p>
-      </div>
-      <div class="combo-box">
-        <h3>🀄 KAN (Quad)</h3>
-        <p>Bila kamu punya 4 tile sama, klik KAN untuk membentuk quad. Kamu mendapat 1 tile bonus dari dinding!</p>
-      </div>
-      <div class="combo-box">
-        <h3>🏆 MENANG</h3>
-        <p>Bila tanganmu sudah lengkap (tsumo = dari dinding, atau ron = dari buangan lawan), klik MENANG!</p>
-      </div>
-    </div>
-    <div class="tut-section">
-      <h2>💡 Tips Bermain</h2>
-      <p>• Fokuslah pada <span class="highlight">1-2 jenis suit</span> saja untuk lebih mudah membentuk urutan.</p>
-      <p>• Buang tile <span class="highlight">angin dan naga</span> yang tidak berguna lebih awal.</p>
-      <p>• Tile <span class="highlight">1, 9, dan kehormatan</span> (terminal/honor) lebih sulit digunakan dalam urutan — buang duluan bila tak ada rencana triplet.</p>
-      <p>• Perhatikan tile yang sudah dibuang pemain lain — itu memberimu petunjuk tile apa yang masih ada di dinding.</p>
+      <h2>🔧 Tombol Aksi</h2>
+      <div class="combo-box"><h3>📥 AMBIL</h3><p>Ambil 1 tile dari dinding. Tile baru berwarna hijau.</p></div>
+      <div class="combo-box"><h3>🗑️ BUANG</h3><p>Pilih tile (menjadi merah) lalu klik BUANG.</p></div>
+      <div class="combo-box"><h3>🍜 CHI · PON · KAN</h3><p>Klaim tile buangan lawan untuk membentuk set.</p></div>
+      <div class="combo-box"><h3>🔥 RIICHI!</h3><p>Deklarasi Riichi saat tangan tertutup & tenpai. Buang tile pilihan, bayar 1000 poin, dapat +1 Han bonus.</p></div>
+      <div class="combo-box"><h3>🏆 TSUMO · RON</h3><p>Menang dari dinding atau dari buangan lawan.</p></div>
     </div>
   </div>
 
-  <!-- TAB: Skor -->
-  <div id="tut-skor" class="tut-content">
+  <div id="tut-riichi" class="tut-content" style="max-width:900px;margin:0 auto;">
     <div class="tut-section">
-      <h2>🏆 Cara Menghitung Skor</h2>
-      <p>Skor dasar dihitung dari <span class="highlight">Fu (unit dasar)</span> dan <span class="highlight">Han (poin yaku)</span>:</p>
-      <p style="text-align:center;padding:10px;background:rgba(201,168,76,0.1);border-radius:6px;font-size:1rem;color:var(--gold-light);">
-        Skor = Fu × 2<sup>Han+2</sup> × 4
-      </p>
-      <table class="score-table">
-        <tr><th>Aksi</th><th>Han/Poin</th></tr>
-        <tr><td>Tsumo (menang dari dinding sendiri)</td><td>+1 Han</td></tr>
-        <tr><td>Triplet Naga</td><td>+1 Han</td></tr>
-        <tr><td>Triplet Angin Ronde</td><td>+1 Han</td></tr>
-        <tr><td>Tangan Tertutup + Ron</td><td>+1 Han</td></tr>
-        <tr><td>Tangan Tanyao (semua tile tengah 2-8)</td><td>+1 Han</td></tr>
-        <tr><td>Pinfu (semua urutan + pasangan bukan kehormatan)</td><td>+1 Han</td></tr>
-        <tr><td>Tujuh Pasang</td><td>+2 Han</td></tr>
-        <tr><td>Kokushi Musou</td><td>+13 Han (Yakuman!)</td></tr>
-      </table>
+      <h2>🔥 Riichi (立直)</h2>
+      <p>Riichi adalah aturan ikonik Mahjong Jepang. Kamu bisa deklarasi <span class="highlight">Riichi</span> ketika:</p>
+      <p>• Tanganmu <span class="highlight">tertutup</span> (belum Chi/Pon/Kan)</p>
+      <p>• Tanganmu sudah <span class="highlight">tenpai</span> (1 tile lagi menang)</p>
+      <p>• Kamu punya minimal <span class="highlight">1000 poin</span></p>
+      <div class="combo-box"><h3>✅ Efek Riichi</h3><p>+1 Han untuk kemenangan. Setelah riichi, kamu hanya bisa draw dan langsung buang tile terbaru (tidak bisa Chi/Pon/Kan). Jika menang saat giliranmu pertama setelah riichi = +1 Han Ippatsu!</p></div>
+      <div class="combo-box"><h3>💰 Riichi Bet</h3><p>Bayar 1000 poin sebagai taruhan. Pemenang mengambil semua taruhan riichi di meja.</p></div>
     </div>
     <div class="tut-section">
-      <h2>⚡ Yakuman (Tangan Sempurna)</h2>
-      <p>Yakuman adalah kondisi langka dengan nilai maksimum, biasanya <span class="highlight">32.000 poin</span> atau lebih!</p>
-      <div class="combo-box"><h3>💎 Kokushi Musou (十三幺)</h3><p>Semua 13 tile terminal dan kehormatan yang berbeda + 1 duplikat.</p></div>
-      <div class="combo-box"><h3>💎 Suuankou (四暗刻)</h3><p>4 triplet tertutup + 1 pasangan. Semua set tidak boleh dari klaim.</p></div>
-      <div class="combo-box"><h3>💎 Daisangen (大三元)</h3><p>Triplet semua 3 naga: 中, 白, 發.</p></div>
-      <div class="combo-box"><h3>💎 Shousuushii / Daisuushii (小四喜/大四喜)</h3><p>Triplet/quad semua 4 angin (+ pasangan untuk kecil).</p></div>
+      <h2>🎲 Dora (ドラ)</h2>
+      <p>Dora adalah tile bonus yang menambah nilai kemenangan tanpa jadi yaku.</p>
+      <p>Di awal permainan, 1 tile dibalik dari <span class="highlight">Dead Wall</span> sebagai indikator. Tile <span class="highlight">BERIKUTNYA</span> dalam urutan itulah Dora (+1 Han per tile).</p>
+      <div class="combo-box"><h3>📋 Urutan Dora</h3><p>Bambu/Lingkaran/Wan: 1→2→...→9→1 · Angin: 東→南→西→北→東 · Naga: 白→發→中→白</p></div>
+      <div class="combo-box"><h3>🀄 Dead Wall & Rinshan</h3><p>14 tile terakhir disisihkan sebagai Dead Wall. Saat Kan, tile pengganti diambil dari Dead Wall, dan 1 Dora baru dibalik (Kan Dora)!</p></div>
+      <div class="combo-box"><h3>🔮 Ura-Dora</h3><p>Saat pemain Riichi menang, tile tersembunyi di bawah indikator Dora dibalik sebagai bonus tambahan!</p></div>
+    </div>
+    <div class="tut-section">
+      <h2>🎯 Tenpai Display</h2>
+      <p>Saat tanganmu <span class="highlight">tenpai</span>, bar hijau di bawah tanganmu menampilkan semua tile yang bisa melengkapimu. Gunakan ini untuk memutuskan strategi!</p>
+    </div>
+  </div>
+
+  <div id="tut-skor" class="tut-content" style="max-width:900px;margin:0 auto;">
+    <div class="tut-section">
+      <h2>🏆 Sistem Poin (Han)</h2>
+      <table class="score-table">
+        <tr><th>Yaku / Bonus</th><th>Han</th></tr>
+        <tr><td>Riichi (立直)</td><td>+1</td></tr>
+        <tr><td>Ippatsu (一発) — menang saat giliranmu pertama setelah riichi</td><td>+1</td></tr>
+        <tr><td>Menzen Tsumo — menang dari dinding tangan tertutup</td><td>+1</td></tr>
+        <tr><td>Ron tangan tertutup</td><td>+1</td></tr>
+        <tr><td>Tanyao (断么九) — semua tile 2–8</td><td>+1</td></tr>
+        <tr><td>Triplet Naga (中/發/白)</td><td>+1 per triplet</td></tr>
+        <tr><td>Tujuh Pasang (七対子)</td><td>+2</td></tr>
+        <tr><td>Dora · Ura-Dora</td><td>+1 per tile</td></tr>
+      </table>
+      <p style="text-align:center;padding:10px;background:rgba(201,168,76,0.1);border-radius:6px;font-size:1rem;color:var(--gold-light);">Skor = 30 × 2^(Han+2)</p>
     </div>
   </div>
 
@@ -849,106 +390,162 @@
   </div>
 </div>
 
-<!-- ===== LAYAR PERMAINAN ===== -->
+<!-- ===== GAME SCREEN ===== -->
 <div id="screen-game" class="screen">
+  
+  <!-- Header -->
   <div class="game-header">
     <div class="game-title">🀄 Mahjong 麻将</div>
     <div class="game-info">
       <div class="info-box">Ronde<span id="info-round">Timur 1</span></div>
       <div class="info-box">Dinding<span id="info-wall">70</span></div>
       <div class="info-box">Giliran<span id="info-turn">Kamu</span></div>
-      <div class="info-box">Skormu<span id="info-score">25000</span></div>
+      <div class="info-box">Poin<span id="info-score">25000</span></div>
     </div>
-    <div>
-      <button class="btn-green" id="btn-game-tutorial" style="font-size:0.75rem;padding:6px 14px;">Tutorial</button>
-      <button class="btn-green" id="btn-game-home" style="font-size:0.75rem;padding:6px 14px;">Menu</button>
+    <!-- Dora display -->
+    <div class="dora-display">
+      <div>
+        <div class="dora-label">DORA 指</div>
+        <div class="dora-tiles" id="dora-indicators"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:4px;">
+      <button class="btn-green" id="btn-game-tutorial" style="font-size:0.7rem;padding:5px 10px;">Tutorial</button>
+      <button class="btn-green" id="btn-game-home" style="font-size:0.7rem;padding:5px 10px;">Menu</button>
     </div>
   </div>
 
+  <!-- Board -->
   <div class="game-board">
-    <!-- Lawan Atas -->
-    <div class="player-area">
-      <div class="player-label">🤖 Lawan Atas (Barat) <span class="score-badge" id="score-top">25000</span></div>
-      <div class="opponent-hand" id="hand-top"></div>
-      <div class="meld-area" id="meld-top"></div>
+
+    <!-- TOP OPPONENT -->
+    <div class="opp-top-area">
+      <div class="opp-top-header">
+        <div class="opp-name-label" id="opp-top-label">🤖 Lawan Atas · Barat <span id="riichi-top-badge" style="display:none;" class="riichi-indicator">🔥 RIICHI</span></div>
+        <span class="score-badge" id="score-top">25000</span>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:center;">
+        <div class="opp-top-tiles" id="hand-top"></div>
+        <div class="meld-area" id="meld-top"></div>
+      </div>
     </div>
 
-    <!-- Area Tengah -->
-    <div class="middle-area">
-      <!-- Buangan Kiri -->
-      <div class="discard-pile">
-        <h4>BUANGAN KIRI</h4>
-        <div class="discard-grid" id="discard-left"></div>
+    <!-- MIDDLE SECTION: Left Opp | Center Board | Right Opp -->
+    <div class="middle-section">
+
+      <!-- LEFT OPPONENT -->
+      <div class="side-opp" id="opp-left-area">
+        <div class="side-opp-label">🤖 Kiri · Selatan</div>
+        <div class="side-opp-score" id="score-left">25000</div>
+        <div id="riichi-left-badge" class="side-opp-riichi" style="display:none;">🔥</div>
+        <div class="side-tiles" id="hand-left"></div>
+        <div class="side-melds" id="meld-left"></div>
       </div>
 
-      <!-- Info Tengah -->
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <!-- Buangan Atas -->
-        <div class="discard-pile" style="min-height:80px;">
-          <h4>BUANGAN ATAS</h4>
+      <!-- CENTER BOARD -->
+      <div class="center-board">
+        <!-- Discard Atas -->
+        <div class="discard-area discard-area-top" style="min-height:50px;">
+          <h5>BUANGAN ATAS</h5>
           <div class="discard-grid" id="discard-top"></div>
         </div>
+
+        <!-- Discard Kiri -->
+        <div class="discard-area discard-area-left" style="min-height:80px;">
+          <h5>BUANGAN KIRI</h5>
+          <div class="discard-grid" id="discard-left"></div>
+        </div>
+
+        <!-- Center Info -->
         <div class="center-info">
           <div class="wind-indicator" id="round-wind">東</div>
-          <div class="round-info" id="round-info-text">Ronde Timur · Babak 1</div>
-          <div class="wall-count">🀄 Sisa Dinding: <strong id="wall-display">70</strong></div>
-          <div class="drawn-tile-display" id="drawn-display">Belum ada tile</div>
+          <div class="round-info">Babak 1</div>
+          <div class="wall-count">🀄 <strong id="wall-display">70</strong></div>
+          <div class="drawn-info" id="drawn-display">—</div>
+          <!-- Riichi sticks on table -->
+          <div class="riichi-sticks" id="riichi-sticks-area" style="display:none;">
+            <div class="riichi-bets-label">🔥 Bet: <span id="riichi-bet-count">0</span>×1000</div>
+            <div id="riichi-sticks-visual"></div>
+          </div>
         </div>
-        <!-- Buangan Bawah (Kita) -->
-        <div class="discard-pile" style="min-height:80px;">
-          <h4>BUANGANMU</h4>
+
+        <!-- Discard Kanan -->
+        <div class="discard-area discard-area-right" style="min-height:80px;">
+          <h5>BUANGAN KANAN</h5>
+          <div class="discard-grid" id="discard-right"></div>
+        </div>
+
+        <!-- Discard Player -->
+        <div class="discard-area discard-area-bottom" style="min-height:50px;">
+          <h5>BUANGANMU</h5>
           <div class="discard-grid" id="discard-player"></div>
         </div>
       </div>
 
-      <!-- Buangan Kanan -->
-      <div class="discard-pile">
-        <h4>BUANGAN KANAN</h4>
-        <div class="discard-grid" id="discard-right"></div>
+      <!-- RIGHT OPPONENT -->
+      <div class="side-opp" id="opp-right-area">
+        <div class="side-opp-label">🤖 Kanan · Utara</div>
+        <div class="side-opp-score" id="score-right">25000</div>
+        <div id="riichi-right-badge" class="side-opp-riichi" style="display:none;">🔥</div>
+        <div class="side-tiles" id="hand-right"></div>
+        <div class="side-melds" id="meld-right"></div>
       </div>
-    </div>
 
-    <!-- Tangan Pemain -->
-    <div class="player-area" style="background:rgba(30,92,56,0.3);border-color:rgba(201,168,76,0.3);">
-      <div class="player-label">🧑 TANGANMU <span class="score-badge" id="score-player">25000</span></div>
+    </div><!-- end middle-section -->
+
+    <!-- PLAYER AREA -->
+    <div class="player-area">
+      <div class="player-label">
+        <span>🧑 TANGANMU <span id="riichi-player-badge" style="display:none;background:rgba(255,50,50,0.2);border:1px solid #e74c3c;padding:1px 6px;border-radius:3px;color:#ff8888;font-size:0.7rem;">🔥 RIICHI</span></span>
+        <span class="score-badge" id="score-player">25000</span>
+      </div>
       <div class="player-hand" id="hand-player"></div>
       <div class="meld-area" id="meld-player"></div>
     </div>
 
-    <!-- Action Bar -->
-    <div>
+    <!-- ACTION BAR -->
+    <div class="action-section">
       <div class="action-bar">
-        <button class="action-btn btn-draw" id="btn-draw">Ambil Tile</button>
-        <button class="action-btn btn-discard" id="btn-discard" disabled>Buang</button>
-        <button class="action-btn btn-chi" id="btn-chi" disabled>Chi</button>
-        <button class="action-btn btn-pon" id="btn-pon" disabled>Pon</button>
-        <button class="action-btn btn-kan" id="btn-kan" disabled>Kan</button>
-        <button class="action-btn btn-win" id="btn-win" disabled>Menang!</button>
+        <button class="action-btn btn-draw" id="btn-draw">📥 Ambil</button>
+        <button class="action-btn btn-discard" id="btn-discard" disabled>🗑️ Buang</button>
+        <button class="action-btn btn-chi" id="btn-chi" disabled>🍜 Chi</button>
+        <button class="action-btn btn-pon" id="btn-pon" disabled>🀄 Pon</button>
+        <button class="action-btn btn-kan" id="btn-kan" disabled>🀄 Kan</button>
+        <button class="action-btn btn-riichi" id="btn-riichi" disabled>🔥 Riichi!</button>
+        <button class="action-btn btn-ron" id="btn-ron" disabled>⚡ Ron!</button>
+        <button class="action-btn btn-win" id="btn-win" disabled>🏆 Tsumo!</button>
       </div>
+      <!-- Tenpai display -->
+      <div class="tenpai-bar" id="tenpai-bar">
+        <span class="tenpai-label">待牌 MENUNGGU:</span>
+        <div class="tenpai-tiles" id="tenpai-tiles"></div>
+      </div>
+      <!-- Log -->
       <div class="game-log" id="game-log">
-        <div class="log-entry">Selamat datang di Mahjong Simulator! Klik AMBIL TILE untuk memulai.</div>
+        <div class="log-entry">Selamat datang! Klik AMBIL TILE untuk memulai.</div>
       </div>
     </div>
-  </div>
-</div>
+
+  </div><!-- end game-board -->
+</div><!-- end screen-game -->
 
 <!-- Modal Menang -->
 <div class="modal-overlay" id="modal-win">
   <div class="modal-box">
-    <h2>Selamat!</h2>
+    <h2>🏆 Menang!</h2>
     <div class="win-score" id="win-score-display">+8000</div>
     <div class="win-hands" id="win-hands-display"></div>
-    <p id="win-desc">Kamu berhasil menyelesaikan tangan Mahjong!</p>
+    <p id="win-desc"></p>
     <button class="btn-gold" id="btn-win-newround">Ronde Baru</button>
     <button class="btn-green" id="btn-win-menu">Menu Utama</button>
   </div>
 </div>
 
-<!-- Modal Kalah (Dinding Habis) -->
+<!-- Modal Seri -->
 <div class="modal-overlay" id="modal-draw">
   <div class="modal-box">
-    <h2>Seri — Ryuukyoku</h2>
-    <p>Dinding habis tanpa ada yang menang. Ronde berakhir seri. Pemain yang belum tenpai membayar denda!</p>
+    <h2>Ryuukyoku — Seri</h2>
+    <p id="draw-desc">Dinding habis tanpa ada yang menang.</p>
     <button class="btn-gold" id="btn-draw-newround">Ronde Baru</button>
     <button class="btn-green" id="btn-draw-menu">Menu Utama</button>
   </div>
@@ -956,562 +553,1004 @@
 
 <script>
 // =============================================
-// DATA TILE
+// TILE DATA
 // =============================================
-const TILES = [];
-const SUITS = ['bambu','lingkaran','wan'];
-const SUIT_SYMS = {
-  bambu: ['🎋','🀐','🀑','🀒','🀓','🀔','🀕','🀖','🀗'],
-  lingkaran: ['🀙','🀚','🀛','🀜','🀝','🀞','🀟','🀠','🀡'],
-  wan: ['一萬','二萬','三萬','四萬','五萬','六萬','七萬','八萬','九萬']
+const SUITS=['bambu','lingkaran','wan'];
+const SUIT_SYMS={
+  bambu:['🎋','🀐','🀑','🀒','🀓','🀔','🀕','🀖','🀗'],
+  lingkaran:['🀙','🀚','🀛','🀜','🀝','🀞','🀟','🀠','🀡'],
+  wan:['一萬','二萬','三萬','四萬','五萬','六萬','七萬','八萬','九萬']
 };
-const WINDS = [{sym:'東',name:'Timur'},{sym:'南',name:'Selatan'},{sym:'西',name:'Barat'},{sym:'北',name:'Utara'}];
-const DRAGONS = [{sym:'中',name:'Chun',cls:'dragon-chun'},{sym:'白',name:'Haku',cls:'dragon-haku'},{sym:'發',name:'Hatsu',cls:'dragon-hatsu'}];
+const WINDS=[{sym:'東',name:'Timur'},{sym:'南',name:'Selatan'},{sym:'西',name:'Barat'},{sym:'北',name:'Utara'}];
+const DRAGONS=[{sym:'中',name:'Chun',cls:'dragon-chun'},{sym:'白',name:'Haku',cls:'dragon-haku'},{sym:'發',name:'Hatsu',cls:'dragon-hatsu'}];
 
-function buildDeck() {
-  const deck = [];
-  for (let s = 0; s < 3; s++) {
-    for (let n = 1; n <= 9; n++) {
-      for (let c = 0; c < 4; c++) {
-        deck.push({ suit: SUITS[s], num: n, sym: SUIT_SYMS[SUITS[s]][n-1], cls: SUITS[s] === 'wan' ? 'mwan' : SUITS[s] === 'bambu' ? 'bamboo' : 'circle' });
+function buildDeck(){
+  const d=[];
+  for(let s=0;s<3;s++){
+    for(let n=1;n<=9;n++){
+      for(let c=0;c<4;c++){
+        d.push({suit:SUITS[s],num:n,sym:SUIT_SYMS[SUITS[s]][n-1],
+          cls:SUITS[s]==='wan'?'mwan':SUITS[s]==='bambu'?'bamboo':'circle'});
       }
     }
   }
-  for (const w of WINDS) {
-    for (let c = 0; c < 4; c++) deck.push({ suit: 'wind', num: 0, sym: w.sym, name: w.name, cls: 'wind' });
-  }
-  for (const d of DRAGONS) {
-    for (let c = 0; c < 4; c++) deck.push({ suit: 'dragon', num: 0, sym: d.sym, name: d.name, cls: d.cls });
-  }
-  return deck;
+  for(const w of WINDS) for(let c=0;c<4;c++) d.push({suit:'wind',num:0,sym:w.sym,name:w.name,cls:'wind'});
+  for(const dr of DRAGONS) for(let c=0;c<4;c++) d.push({suit:'dragon',num:0,sym:dr.sym,name:dr.name,cls:dr.cls});
+  return d;
 }
 
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
   return arr;
 }
 
-function tileKey(t) { return t.suit + '_' + t.num + '_' + t.sym; }
+function tileKey(t){return t.suit+'_'+t.num+'_'+t.sym;}
 
 // =============================================
-// STATE PERMAINAN
+// DORA UTILS
 // =============================================
-let state = {};
-
-function startGame() {
-  const deck = shuffle(buildDeck());
-  state = {
-    wall: deck,
-    playerHand: [],
-    opponentHands: [[],[],[]], // kiri, atas, kanan
-    playerMelds: [],
-    opponentMelds: [[],[],[]],
-    discards: [[], [], [], []], // player, kiri, atas, kanan
-    scores: [25000, 25000, 25000, 25000],
-    round: 0,
-    turn: 0, // 0 = player
-    phase: 'draw', // draw | discard | claim
-    selectedTile: -1,
-    lastDiscard: null,
-    lastDiscardFrom: -1,
-    drawnTile: null,
-    canChi: false,
-    canPon: false,
-    canKan: false,
-    gameOver: false
-  };
-
-  // Bagikan tile
-  for (let i = 0; i < 13; i++) {
-    state.playerHand.push(state.wall.pop());
-    for (let o = 0; o < 3; o++) state.opponentHands[o].push(state.wall.pop());
+function doraFromIndicator(ind){
+  if(ind.suit==='wind'){
+    const order=['東','南','西','北'];
+    const next=order[(order.indexOf(ind.sym)+1)%4];
+    const w=WINDS.find(x=>x.sym===next);
+    return{suit:'wind',num:0,sym:next,name:w.name,cls:'wind'};
   }
-  // Dealer (player) dapat 1 ekstra
-  state.playerHand.push(state.wall.pop());
-  state.phase = 'discard';
+  if(ind.suit==='dragon'){
+    const order=['白','發','中'];
+    const next=order[(order.indexOf(ind.sym)+1)%3];
+    const dr=DRAGONS.find(x=>x.sym===next);
+    return{suit:'dragon',num:0,sym:next,name:dr.name,cls:dr.cls};
+  }
+  const nextNum=(ind.num%9)+1;
+  return{suit:ind.suit,num:nextNum,sym:SUIT_SYMS[ind.suit][nextNum-1],cls:ind.cls};
+}
 
-  addLog('Tile dibagikan! Kamu adalah Dealer (Timur). Pilih tile untuk dibuang.', 'important');
+function countDora(hand,melds){
+  const all=[...hand,...melds.flat()];
+  let count=0;
+  for(const ind of state.doraIndicators){
+    const dora=doraFromIndicator(ind);
+    count+=all.filter(t=>t.suit===dora.suit&&t.sym===dora.sym).length;
+  }
+  return count;
+}
+
+function countUraDora(hand,melds){
+  const all=[...hand,...melds.flat()];
+  let count=0;
+  for(const ind of state.uraDoraIndicators){
+    const dora=doraFromIndicator(ind);
+    count+=all.filter(t=>t.suit===dora.suit&&t.sym===dora.sym).length;
+  }
+  return count;
+}
+
+// =============================================
+// STATE
+// =============================================
+let state={};
+
+function startGame(){
+  const fullDeck=shuffle(buildDeck()); // 136 tiles
+  // Dead wall: last 14 tiles
+  const dw=fullDeck.splice(fullDeck.length-14,14);
+  state={
+    wall:fullDeck,
+    deadWall:dw,
+    doraIndicators:[dw[0]],      // first dora indicator revealed
+    uraDoraIndicators:[dw[7]],   // ura-dora (hidden until riichi win)
+    doraPool:dw.slice(1,4),      // 3 more dora to reveal on kan
+    rinshan:dw.slice(8,14),      // replacement tiles for kan
+    playerHand:[],
+    opponentHands:[[],[],[]],
+    playerMelds:[],
+    opponentMelds:[[],[],[]],
+    discards:[[],[],[],[]],
+    scores:[25000,25000,25000,25000],
+    round:0,
+    turn:0,
+    phase:'draw',
+    selectedTile:-1,
+    lastDiscard:null,
+    lastDiscardFrom:-1,
+    drawnTile:null,
+    canChi:false,canPon:false,canKan:false,canRon:false,
+    gameOver:false,
+    riichi:[false,false,false,false],
+    ippatsu:[false,false,false,false],
+    riichiBets:0,
+  };
+  for(let i=0;i<13;i++){
+    state.playerHand.push(state.wall.pop());
+    for(let o=0;o<3;o++) state.opponentHands[o].push(state.wall.pop());
+  }
+  state.playerHand.push(state.wall.pop()); // dealer gets 14
+  state.phase='discard';
+  addLog('Tile dibagikan! Kamu Dealer (Timur). Pilih tile untuk dibuang.','important');
   updateUI();
 }
 
 // =============================================
-// LOGIKA GAME
+// WIN CHECK
 // =============================================
-function drawTile() {
-  if (state.phase !== 'draw' || state.turn !== 0 || state.wall.length === 0) return;
-  const tile = state.wall.pop();
-  tile.isNew = true;
+function canFormSets(hand,n){
+  if(n===0) return hand.length===0;
+  if(hand.length===0) return false;
+  const first=hand[0];
+  const k=tileKey(first);
+  const sameCount=hand.filter(t=>tileKey(t)===k).length;
+  if(sameCount>=3){
+    let rem=0;
+    const rest=hand.filter(t=>{if(rem<3&&tileKey(t)===k){rem++;return false;}return true;});
+    if(canFormSets(rest,n-1)) return true;
+  }
+  if(first.suit!=='wind'&&first.suit!=='dragon'){
+    const s=first.suit,n1=first.num;
+    const i2=hand.findIndex(t=>t.suit===s&&t.num===n1+1);
+    const i3=hand.findIndex((t,idx)=>t.suit===s&&t.num===n1+2&&idx!==i2);
+    if(i2!==-1&&i3!==-1){
+      const rest=hand.filter((_,idx)=>idx!==0&&idx!==i2&&idx!==i3);
+      if(canFormSets(rest,n-1)) return true;
+    }
+  }
+  return false;
+}
+
+function canFormSetsAndPair(hand,setsNeeded){
+  const keys=hand.map(tileKey);
+  const seen=new Set();
+  for(let i=0;i<hand.length;i++){
+    const k=keys[i];
+    if(seen.has(k)) continue;
+    seen.add(k);
+    const pairIdx=keys.indexOf(k,i+1);
+    if(pairIdx===-1) continue;
+    const rest=hand.filter((_,idx)=>idx!==i&&idx!==pairIdx);
+    if(canFormSets(rest,setsNeeded)) return true;
+  }
+  return false;
+}
+
+function isWinningHand(hand,melds){
+  const effectiveMeldCount=melds.length;
+  const setsNeeded=4-effectiveMeldCount;
+  if(melds.length===0&&hand.length===14){
+    const keys=hand.map(tileKey).sort();
+    let ok=true;
+    for(let i=0;i<keys.length;i+=2) if(keys[i]!==keys[i+1]){ok=false;break;}
+    if(ok) return true;
+  }
+  return canFormSetsAndPair(hand.slice(),setsNeeded);
+}
+
+function checkWin(hand,melds){
+  const meldTiles=melds.reduce((s,m)=>s+(m.length===4?3:m.length),0);
+  const total=hand.length+meldTiles;
+  if(total!==14) return false;
+  return isWinningHand(hand.slice(),melds);
+}
+
+// =============================================
+// TENPAI CHECK
+// =============================================
+function isTenpai(hand,melds){
+  const candidates=buildDeck();
+  for(const tile of candidates){
+    const testHand=[...hand,tile];
+    if(checkWin(testHand,melds)) return true;
+  }
+  return false;
+}
+
+function getWinningTiles(hand,melds){
+  const seen=new Set();
+  const result=[];
+  const candidates=buildDeck();
+  for(const tile of candidates){
+    const k=tileKey(tile);
+    if(seen.has(k)) continue;
+    seen.add(k);
+    if(checkWin([...hand,tile],melds)) result.push(tile);
+  }
+  return result;
+}
+
+// =============================================
+// SCORING
+// =============================================
+function calculateScore(hand,melds,winType,playerIdx=0){
+  let han=0;
+  const yakuList=[];
+
+  const isOpen=melds.length>0;
+
+  // Riichi
+  if(state.riichi[playerIdx]){
+    han++;yakuList.push('Riichi');
+    if(state.ippatsu[playerIdx]){han++;yakuList.push('Ippatsu');}
+  }
+
+  // Menzen Tsumo
+  if(winType==='tsumo'&&!isOpen){han++;yakuList.push('Menzen Tsumo');}
+  else if(winType==='ron'&&!isOpen&&!state.riichi[playerIdx]){han++;yakuList.push('Menzen Ron');}
+
+  // Dragon triplets
+  const dragonMelds=melds.filter(m=>m[0].suit==='dragon');
+  if(dragonMelds.length){han+=dragonMelds.length;yakuList.push(`Naga ×${dragonMelds.length}`);}
+
+  // 7 pairs
+  if(melds.length===0&&hand.length===14){
+    const keys=hand.map(tileKey).sort();
+    let ok=true;
+    for(let i=0;i<keys.length;i+=2) if(keys[i]!==keys[i+1]){ok=false;break;}
+    if(ok){han+=2;yakuList.push('Tujuh Pasang (七対子)');}
+  }
+
+  // Tanyao
+  const allTiles=[...hand,...melds.flat()];
+  const tanyao=allTiles.every(t=>t.suit!=='wind'&&t.suit!=='dragon'&&t.num>=2&&t.num<=8);
+  if(tanyao){han++;yakuList.push('Tanyao');}
+
+  // Dora
+  const doraCount=countDora(hand,melds);
+  if(doraCount>0){han+=doraCount;yakuList.push(`Dora ×${doraCount}`);}
+
+  // Ura-Dora (only on riichi win)
+  if(state.riichi[playerIdx]){
+    const uraCount=countUraDora(hand,melds);
+    if(uraCount>0){han+=uraCount;yakuList.push(`Ura-Dora ×${uraCount}`);}
+  }
+
+  const baseScore=Math.max(1000,30*Math.pow(2,han+2));
+
+  // Collect riichi bets for winner
+  const riichiBonus=state.riichiBets*1000;
+
+  return{han,yakuList,baseScore,riichiBonus};
+}
+
+// =============================================
+// AI LOGIC
+// =============================================
+function tileScore(tile,hand){
+  let score=0;
+  for(const t of hand){
+    if(t===tile) continue;
+    if(tileKey(t)===tileKey(tile)) score+=3;
+    if(t.suit===tile.suit&&tile.suit!=='wind'&&tile.suit!=='dragon'){
+      const diff=Math.abs(t.num-tile.num);
+      if(diff<=2) score+=(3-diff);
+    }
+  }
+  return score;
+}
+
+function chooseDiscard(hand){
+  let minScore=Infinity,chosen=0;
+  for(let i=0;i<hand.length;i++){
+    const s=tileScore(hand[i],hand);
+    if(s<minScore){minScore=s;chosen=i;}
+  }
+  return chosen;
+}
+
+function aiWin(aiIdx,winType='tsumo'){
+  const hand=state.opponentHands[aiIdx];
+  const melds=state.opponentMelds[aiIdx];
+  if(!checkWin(hand,melds)) return false;
+  const{han,yakuList,baseScore,riichiBonus}=calculateScore(hand,melds,winType,aiIdx+1);
+  state.scores[aiIdx+1]+=baseScore+riichiBonus;
+  if(riichiBonus>0) state.riichiBets=0;
+  const names=['Kiri','Atas','Kanan'];
+  document.getElementById('win-score-display').textContent=`🤖 ${names[aiIdx]} MENANG! +${(baseScore+riichiBonus).toLocaleString()}`;
+  document.getElementById('win-hands-display').textContent=yakuList.join(' · ');
+  document.getElementById('win-desc').textContent=`Han: ${han} · Skor: ${state.scores[aiIdx+1].toLocaleString()}`;
+  showModal('modal-win');
+  addLog(`🤖 Lawan ${names[aiIdx]} ${winType==='ron'?'RON':'TSUMO'}! ${yakuList.join(', ')} — +${baseScore+riichiBonus}`,'win');
+  return true;
+}
+
+function canAiRon(aiIdx,discardTile){
+  const hand=state.opponentHands[aiIdx];
+  const melds=state.opponentMelds[aiIdx];
+  if(state.riichi[aiIdx+1]){
+    // After riichi, can only ron if tile matches wait
+    return checkWin([...hand,discardTile],melds);
+  }
+  return checkWin([...hand,discardTile],melds);
+}
+
+function canRon(){
+  if(!state.lastDiscard) return false;
+  const hand=state.playerHand;
+  const melds=state.playerMelds;
+  // Furiten: if winning tile was previously discarded by player
+  const furitenTile=state.discards[0].some(t=>tileKey(t)===tileKey(state.lastDiscard));
+  if(furitenTile) return false;
+  // After riichi, only ron if tile matches
+  return checkWin([...hand,state.lastDiscard],melds);
+}
+
+// =============================================
+// GAME LOGIC
+// =============================================
+function drawTile(){
+  if(state.phase!=='draw'||state.turn!==0||state.wall.length===0) return;
+  const tile=state.wall.pop();
+  tile.isNew=true;
   state.playerHand.push(tile);
-  state.drawnTile = tile;
-  state.phase = 'discard';
-  addLog(`Kamu mengambil tile: ${tile.sym}`);
-  checkWin(state.playerHand, state.playerMelds, true);
+  state.drawnTile=tile;
+  state.phase='discard';
+
+  // If riichi, force-select the drawn tile (last tile)
+  if(state.riichi[0]){
+    state.selectedTile=state.playerHand.length-1;
+    addLog(`Kamu ambil: ${tile.sym} — Riichi aktif, buang tile ini atau TSUMO!`);
+  } else {
+    addLog(`Kamu ambil: ${tile.sym}`);
+  }
   updateUI();
 }
 
-function discardSelected() {
-  if (state.selectedTile < 0 || state.phase !== 'discard' || state.turn !== 0) return;
-  const idx = state.selectedTile;
-  const tile = state.playerHand[idx];
-  state.playerHand.splice(idx, 1);
-  state.playerHand.forEach(t => t.isNew = false);
+function discardSelected(){
+  if(state.selectedTile<0||state.phase!=='discard'||state.turn!==0) return;
+  
+  // After riichi: can only discard the drawn tile (last in hand)
+  if(state.riichi[0]&&state.selectedTile!==state.playerHand.length-1&&state.drawnTile){
+    addLog('Riichi aktif! Kamu hanya bisa membuang tile yang baru ditarik.','error');
+    return;
+  }
+
+  const idx=state.selectedTile;
+  const tile=state.playerHand[idx];
+  state.playerHand.splice(idx,1);
+  state.playerHand.forEach(t=>t.isNew=false);
   state.discards[0].push(tile);
-  state.lastDiscard = tile;
-  state.lastDiscardFrom = 0;
-  state.selectedTile = -1;
-  state.drawnTile = null;
-  addLog(`Kamu membuang: ${tile.sym}`);
-  state.phase = 'claim';
-  // AI check klaim
-  setTimeout(() => {
-    aiDecideClaim();
-  }, 600);
+  state.lastDiscard=tile;
+  state.lastDiscardFrom=0;
+  state.selectedTile=-1;
+  state.drawnTile=null;
+
+  // After riichi discard, ippatsu remains until next draw cycle completes
+  // Reset ippatsu after player's first post-riichi discard
+  if(state.riichi[0]&&state.ippatsu[0]) state.ippatsu[0]=false;
+
+  addLog(`Kamu buang: ${tile.sym}`);
+  state.phase='claim';
+  setTimeout(()=>aiDecideClaim(),700);
   updateUI();
 }
 
-function aiDecideClaim() {
-  // Sederhana: AI Pon jika punya 2 tile sama
-  let claimed = false;
-  for (let o = 0; o < 3; o++) {
-    const hand = state.opponentHands[o];
-    const matches = hand.filter(t => tileKey(t) === tileKey(state.lastDiscard));
-    if (matches.length >= 2 && Math.random() > 0.6) {
-      // Pon
-      const idxs = [];
-      for (let i = 0; i < hand.length; i++) {
-        if (tileKey(hand[i]) === tileKey(state.lastDiscard) && idxs.length < 2) idxs.push(i);
+// Declare Riichi
+function canDeclareRiichi(){
+  if(state.riichi[0]) return false;
+  if(state.playerMelds.length>0) return false;
+  if(state.phase!=='discard'||state.turn!==0) return false;
+  if(state.scores[0]<1000) return false;
+  if(state.wall.length<4) return false;
+  // Check tenpai with current 13-tile hand (player has 13 or 14)
+  // For riichi, hand should be in tenpai after discarding
+  return isTenpai(state.playerHand,state.playerMelds);
+}
+
+function doRiichi(){
+  if(!canDeclareRiichi()) return;
+  if(state.selectedTile<0){addLog('Pilih tile yang ingin dibuang untuk Riichi!','error');return;}
+
+  // Check remaining hand is tenpai after this discard
+  const handCopy=[...state.playerHand];
+  handCopy.splice(state.selectedTile,1);
+  if(!isTenpai(handCopy,state.playerMelds)){
+    addLog('Tangan tidak tenpai setelah buang tile ini. Pilih tile lain!','error');
+    return;
+  }
+
+  // Discard selected + declare riichi
+  const tile=state.playerHand.splice(state.selectedTile,1)[0];
+  state.playerHand.forEach(t=>t.isNew=false);
+  state.discards[0].push(tile);
+  state.lastDiscard=tile;
+  state.lastDiscardFrom=0;
+  state.selectedTile=-1;
+  state.drawnTile=null;
+
+  state.riichi[0]=true;
+  state.ippatsu[0]=true;
+  state.scores[0]-=1000;
+  state.riichiBets++;
+
+  addLog(`🔥 RIICHI! Buang ${tile.sym}. -1000 poin → ${state.scores[0].toLocaleString()}. Menunggu tile...`,'riichi');
+
+  // Show waiting tiles
+  const waitTiles=getWinningTiles(state.playerHand,state.playerMelds);
+  if(waitTiles.length){
+    addLog(`待牌: ${waitTiles.map(t=>t.sym).join(' ')}`, 'important');
+  }
+
+  state.phase='claim';
+  setTimeout(()=>aiDecideClaim(),700);
+  updateUI();
+}
+
+function aiDecideClaim(){
+  if(state.gameOver) return;
+
+  // Check AI Ron
+  for(let o=0;o<3;o++){
+    if(canAiRon(o,state.lastDiscard)){
+      state.opponentHands[o].push({...state.lastDiscard});
+      const dPile=state.discards[state.lastDiscardFrom];
+      const ti=dPile.map(tileKey).lastIndexOf(tileKey(state.lastDiscard));
+      if(ti!==-1) dPile.splice(ti,1);
+      addLog(`🤖 Lawan ${['Kiri','Atas','Kanan'][o]} RON!`,'win');
+      aiWin(o,'ron');
+      state.gameOver=true;
+      updateUI();
+      return;
+    }
+  }
+
+  // Check AI Pon (skip if riichi)
+  let claimed=false;
+  for(let o=0;o<3;o++){
+    if(state.riichi[o+1]) continue; // riichi AI can't pon
+    const hand=state.opponentHands[o];
+    const matches=hand.filter(t=>tileKey(t)===tileKey(state.lastDiscard));
+    if(matches.length>=2&&Math.random()>0.5){
+      const idxs=[];
+      for(let i=0;i<hand.length;i++){
+        if(tileKey(hand[i])===tileKey(state.lastDiscard)&&idxs.length<2) idxs.push(i);
       }
-      idxs.sort((a,b)=>b-a).forEach(i => hand.splice(i,1));
+      idxs.sort((a,b)=>b-a).forEach(i=>hand.splice(i,1));
       state.opponentMelds[o].push([{...state.lastDiscard},{...state.lastDiscard},{...state.lastDiscard}]);
-      addLog(`Lawan ${['Kiri','Atas','Kanan'][o]} PON! ${state.lastDiscard.sym}${state.lastDiscard.sym}${state.lastDiscard.sym}`, 'important');
-      // AI buang tile
-      const discardIdx = Math.floor(Math.random() * hand.length);
-      const discarded = hand.splice(discardIdx, 1)[0];
+      const dPile=state.discards[state.lastDiscardFrom];
+      const tIdx=dPile.map(tileKey).lastIndexOf(tileKey(state.lastDiscard));
+      if(tIdx!==-1) dPile.splice(tIdx,1);
+      addLog(`🤖 Lawan ${['Kiri','Atas','Kanan'][o]} PON! ${state.lastDiscard.sym}×3`,'important');
+      if(checkWin(hand,state.opponentMelds[o])){aiWin(o,'tsumo');state.gameOver=true;updateUI();return;}
+      // Clear all ippatsu when someone claims
+      state.ippatsu=[false,false,false,false];
+      const discardIdx=chooseDiscard(hand);
+      const discarded=hand.splice(discardIdx,1)[0];
       state.discards[o+1].push(discarded);
-      state.lastDiscard = discarded;
-      state.lastDiscardFrom = o+1;
-      addLog(`Lawan ${['Kiri','Atas','Kanan'][o]} membuang: ${discarded.sym}`);
-      claimed = true;
+      state.lastDiscard=discarded;
+      state.lastDiscardFrom=o+1;
+      addLog(`🤖 Lawan ${['Kiri','Atas','Kanan'][o]} buang: ${discarded.sym}`);
+      claimed=true;
       break;
     }
   }
-  if (!claimed) {
-    nextTurn();
-  }
+
+  if(!claimed) nextTurn();
   checkClaimButtons();
   updateUI();
 }
 
-function nextTurn() {
-  if (state.wall.length === 0) {
-    showModal('modal-draw');
+function nextTurn(){
+  if(state.wall.length===0){checkExhaustiveDraw();return;}
+
+  for(let o=0;o<3;o++){
+    if(state.wall.length===0) break;
+    const tile=state.wall.pop();
+    state.opponentHands[o].push(tile);
+
+    // Check tsumo
+    if(checkWin(state.opponentHands[o],state.opponentMelds[o])){
+      addLog(`🤖 Lawan ${['Kiri','Atas','Kanan'][o]} TSUMO!`,'win');
+      aiWin(o,'tsumo');
+      state.gameOver=true;
+      updateUI();
+      return;
+    }
+
+    // AI Riichi declaration
+    if(!state.riichi[o+1]&&state.opponentMelds[o].length===0&&state.scores[o+1]>=1000&&Math.random()<0.35){
+      if(isTenpai(state.opponentHands[o],state.opponentMelds[o])){
+        state.riichi[o+1]=true;
+        state.ippatsu[o+1]=true;
+        state.scores[o+1]-=1000;
+        state.riichiBets++;
+        addLog(`🤖 Lawan ${['Kiri','Atas','Kanan'][o]} RIICHI!`,'riichi');
+      }
+    }
+
+    // Discard
+    let discardIdx;
+    if(state.riichi[o+1]){
+      // Must discard drawn tile (last in hand)
+      discardIdx=state.opponentHands[o].length-1;
+    } else {
+      discardIdx=chooseDiscard(state.opponentHands[o]);
+    }
+
+    const discarded=state.opponentHands[o].splice(discardIdx,1)[0];
+    state.discards[o+1].push(discarded);
+    state.lastDiscard=discarded;
+    state.lastDiscardFrom=o+1;
+    addLog(`🤖 Lawan ${['Kiri','Atas','Kanan'][o]} buang: ${discarded.sym}`);
+
+    // Check player Ron
+    if(canRon()){
+      state.canRon=true;
+      addLog(`💡 Kamu bisa RON dari buangan ${['Kiri','Atas','Kanan'][o]}!`,'important');
+      state.phase='ron';
+      // Keep ippatsu[0] if still valid
+      checkClaimButtons();
+      updateUI();
+      return;
+    }
+    // AI ippatsu clears after their discard
+    if(o+1<3) state.ippatsu[o+1]=false;
+  }
+
+  state.turn=0;
+  state.phase='draw';
+  state.ippatsu[0]=state.riichi[0]?state.ippatsu[0]:false; // keep ippatsu only if riichi active and hasn't drawn yet
+  checkClaimButtons();
+  updateUI();
+}
+
+function checkExhaustiveDraw(){
+  const playerTenpai=isTenpai(state.playerHand,state.playerMelds);
+  let msg='Dinding habis! ';
+  if(playerTenpai){msg+='Kamu TENPAI — tidak kena denda.';addLog(msg,'important');}
+  else{msg+='Kamu NOTEN — denda 1000 poin.';state.scores[0]-=1000;addLog(msg,'error');}
+  // Ryuukyoku: riichi bets stay for next round (simplified: return them)
+  document.getElementById('draw-desc').textContent=msg+` Sisa Riichi Bet: ${state.riichiBets*1000} poin.`;
+  showModal('modal-draw');
+}
+
+function checkClaimButtons(){
+  state.canRon=canRon();
+  if(!state.lastDiscard){state.canChi=state.canPon=state.canKan=false;return;}
+  const hand=state.playerHand;
+  const key=tileKey(state.lastDiscard);
+  const matches=hand.filter(t=>tileKey(t)===key);
+
+  // If player is riichi, can only Ron (not chi/pon/kan)
+  if(state.riichi[0]){
+    state.canPon=false;state.canKan=false;state.canChi=false;
     return;
   }
-  // Giliran lawan (simulasi)
-  for (let o = 0; o < 3; o++) {
-    const tile = state.wall.pop();
-    state.opponentHands[o].push(tile);
-    if (state.wall.length === 0) break;
-    // AI buang tile
-    const discardIdx = Math.floor(Math.random() * state.opponentHands[o].length);
-    const discarded = state.opponentHands[o].splice(discardIdx, 1)[0];
-    state.discards[o+1].push(discarded);
-    state.lastDiscard = discarded;
-    state.lastDiscardFrom = o+1;
-    addLog(`Lawan ${['Kiri','Atas','Kanan'][o]} membuang: ${discarded.sym}`);
-  }
-  // Kembali ke giliran player
-  state.turn = 0;
-  state.phase = 'draw';
-  checkClaimButtons();
-  updateUI();
-}
 
-function checkClaimButtons() {
-  if (!state.lastDiscard) { state.canChi = state.canPon = state.canKan = false; return; }
-  const hand = state.playerHand;
-  const key = tileKey(state.lastDiscard);
-  const matches = hand.filter(t => tileKey(t) === key);
-  state.canPon = matches.length >= 2;
-  state.canKan = matches.length >= 3;
-  // Chi: hanya dari kiri (lastDiscardFrom === 1), cek urutan
-  state.canChi = false;
-  if (state.lastDiscardFrom === 1 && state.lastDiscard.suit !== 'wind' && state.lastDiscard.suit !== 'dragon') {
-    const n = state.lastDiscard.num;
-    const s = state.lastDiscard.suit;
-    const nums = hand.filter(t => t.suit === s).map(t => t.num);
-    if ((nums.includes(n-1) && nums.includes(n-2)) ||
-        (nums.includes(n-1) && nums.includes(n+1)) ||
-        (nums.includes(n+1) && nums.includes(n+2))) {
-      state.canChi = true;
-    }
+  state.canPon=matches.length>=2&&state.phase==='claim';
+  state.canKan=matches.length>=3&&state.phase==='claim';
+  state.canChi=false;
+  if(state.phase==='claim'&&(state.lastDiscardFrom===1||state.lastDiscardFrom===3)&&
+     state.lastDiscard.suit!=='wind'&&state.lastDiscard.suit!=='dragon'){
+    const n=state.lastDiscard.num,s=state.lastDiscard.suit;
+    const nums=hand.filter(t=>t.suit===s).map(t=>t.num);
+    if((nums.includes(n-1)&&nums.includes(n-2))||
+       (nums.includes(n-1)&&nums.includes(n+1))||
+       (nums.includes(n+1)&&nums.includes(n+2))) state.canChi=true;
   }
 }
 
-function doChi() {
-  if (!state.canChi) return;
-  const n = state.lastDiscard.num;
-  const s = state.lastDiscard.suit;
-  const hand = state.playerHand;
-  const nums = hand.filter(t => t.suit === s).map(t => t.num);
-  let set = null;
-  if (nums.includes(n-2) && nums.includes(n-1)) set = [n-2, n-1, n];
-  else if (nums.includes(n-1) && nums.includes(n+1)) set = [n-1, n, n+1];
-  else if (nums.includes(n+1) && nums.includes(n+2)) set = [n, n+1, n+2];
-  if (!set) return;
-  const meld = [];
-  for (const num of set) {
-    if (num === n) { meld.push({...state.lastDiscard}); continue; }
-    const idx = hand.findIndex(t => t.suit === s && t.num === num);
-    meld.push(...hand.splice(idx, 1));
-  }
-  state.playerMelds.push(meld);
-  state.lastDiscard = null;
-  state.canChi = state.canPon = state.canKan = false;
-  state.phase = 'discard';
-  addLog(`Kamu CHI! Urutan: ${meld.map(t=>t.sym).join(' ')}`, 'important');
-  updateUI();
-}
-
-function doPon() {
-  if (!state.canPon) return;
-  const hand = state.playerHand;
-  const key = tileKey(state.lastDiscard);
-  const meld = [{...state.lastDiscard}];
-  let count = 0;
-  for (let i = hand.length - 1; i >= 0 && count < 2; i--) {
-    if (tileKey(hand[i]) === key) { meld.push(...hand.splice(i, 1)); count++; }
-  }
-  state.playerMelds.push(meld);
-  state.lastDiscard = null;
-  state.canChi = state.canPon = state.canKan = false;
-  state.phase = 'discard';
-  addLog(`Kamu PON! Triplet: ${meld[0].sym}${meld[0].sym}${meld[0].sym}`, 'important');
-  updateUI();
-}
-
-function doKan() {
-  if (!state.canKan) return;
-  const hand = state.playerHand;
-  const key = tileKey(state.lastDiscard);
-  const meld = [{...state.lastDiscard}];
-  let count = 0;
-  for (let i = hand.length - 1; i >= 0 && count < 3; i--) {
-    if (tileKey(hand[i]) === key) { meld.push(...hand.splice(i, 1)); count++; }
-  }
-  state.playerMelds.push(meld);
-  // Ambil tile bonus
-  const bonus = state.wall.pop();
-  if (bonus) { bonus.isNew = true; hand.push(bonus); }
-  state.lastDiscard = null;
-  state.canChi = state.canPon = state.canKan = false;
-  state.phase = 'discard';
-  addLog(`Kamu KAN! Quad: ${meld[0].sym} ×4. Dapat tile bonus: ${bonus ? bonus.sym : '(kosong)'}`, 'important');
-  updateUI();
-}
-
-function selectTile(idx) {
-  if (state.phase !== 'discard' || state.turn !== 0) return;
-  state.selectedTile = state.selectedTile === idx ? -1 : idx;
-  updateUI();
-}
-
-// =============================================
-// CEK MENANG
-// =============================================
-function checkWin(hand, melds, autoCheck = false) {
-  const allTiles = [...hand];
-  const total = allTiles.length + melds.reduce((s,m) => s + m.length, 0);
-  // Standar: 14 tile
-  if (total !== 14) { return false; }
-  if (isWinningHand(allTiles, melds)) {
-    if (autoCheck) {
-      document.getElementById('btn-win').disabled = false;
-    }
-    return true;
-  }
-  return false;
-}
-
-function isWinningHand(hand, melds) {
-  // Cek 7 pasang
-  if (melds.length === 0 && hand.length === 14) {
-    const keys = hand.map(tileKey).sort();
-    let pairs = 0;
-    for (let i = 0; i < keys.length; i += 2) {
-      if (keys[i] === keys[i+1]) pairs++;
-      else { pairs = 0; break; }
-    }
-    if (pairs === 7) return true;
-  }
-  // Standar: melds sudah terbentuk + cari pair + sets dari hand
-  const setsNeeded = 4 - melds.length;
-  return canFormSetsAndPair(hand.slice(), setsNeeded);
-}
-
-function canFormSetsAndPair(hand, setsNeeded) {
-  if (hand.length === 0 && setsNeeded === 0) return false; // butuh pair
-  // Cari pair dulu
-  const keys = hand.map(tileKey);
-  const seen = new Set();
-  for (let i = 0; i < hand.length; i++) {
-    const k = keys[i];
-    if (seen.has(k)) continue;
-    seen.add(k);
-    // Coba jadikan pair
-    const pairIdx = keys.indexOf(k, i+1);
-    if (pairIdx === -1) continue;
-    const rest = hand.filter((_,idx) => idx !== i && idx !== pairIdx);
-    if (canFormSets(rest, setsNeeded)) return true;
-  }
-  return false;
-}
-
-function canFormSets(hand, n) {
-  if (n === 0) return hand.length === 0;
-  if (hand.length === 0) return false;
-  // Coba triplet
-  const first = hand[0];
-  const k = tileKey(first);
-  const sameCount = hand.filter(t => tileKey(t) === k).length;
-  if (sameCount >= 3) {
-    let removed = 0;
-    const rest = hand.filter(t => { if (removed < 3 && tileKey(t) === k) { removed++; return false; } return true; });
-    if (canFormSets(rest, n-1)) return true;
-  }
-  // Coba urutan
-  if (first.suit !== 'wind' && first.suit !== 'dragon') {
-    const s = first.suit, n1 = first.num;
-    const i2 = hand.findIndex(t => t.suit === s && t.num === n1+1);
-    const i3 = hand.findIndex((t,idx) => t.suit === s && t.num === n1+2 && idx !== i2);
-    if (i2 !== -1 && i3 !== -1) {
-      const rest = hand.filter((_,idx) => idx !== 0 && idx !== i2 && idx !== i3);
-      if (canFormSets(rest, n-1)) return true;
-    }
-  }
-  return false;
-}
-
-function declareWin() {
-  const hand = state.playerHand;
-  const melds = state.playerMelds;
-  // Hitung skor
-  let han = 1; // Tsumo dasar
-  let yakuList = ['Tsumo (menang dari dinding)'];
-  // Cek Naga
-  const dragon_melds = melds.filter(m => m[0].suit === 'dragon');
-  han += dragon_melds.length;
-  if (dragon_melds.length > 0) yakuList.push(`Naga ×${dragon_melds.length}`);
-  // Cek 7 pasang
-  const allKeys = hand.map(tileKey).sort();
-  let pairs7 = 0;
-  for (let i = 0; i < allKeys.length; i += 2) {
-    if (allKeys[i] === allKeys[i+1]) pairs7++;
-    else { pairs7 = 0; break; }
-  }
-  if (pairs7 === 7) { han += 2; yakuList.push('Tujuh Pasang (七対子)'); }
-  // Hitung skor sederhana
-  const baseScore = Math.pow(2, han + 2) * 30;
-  state.scores[0] += baseScore;
-  document.getElementById('win-score-display').textContent = '+' + baseScore.toLocaleString();
-  document.getElementById('win-hands-display').textContent = yakuList.join(' · ');
-  document.getElementById('win-desc').textContent = `Han: ${han} · Skor Total: ${state.scores[0].toLocaleString()}`;
+function doRon(){
+  if(!canRon()) return;
+  const hand=[...state.playerHand,{...state.lastDiscard}];
+  const melds=state.playerMelds;
+  const dPile=state.discards[state.lastDiscardFrom];
+  const tIdx=dPile.map(tileKey).lastIndexOf(tileKey(state.lastDiscard));
+  if(tIdx!==-1) dPile.splice(tIdx,1);
+  const{han,yakuList,baseScore,riichiBonus}=calculateScore(hand,melds,'ron',0);
+  state.scores[0]+=baseScore+riichiBonus;
+  if(riichiBonus>0) state.riichiBets=0;
+  document.getElementById('win-score-display').textContent='+'+(baseScore+riichiBonus).toLocaleString();
+  document.getElementById('win-hands-display').textContent=yakuList.join(' · ');
+  document.getElementById('win-desc').textContent=`Han: ${han} · Skor Total: ${state.scores[0].toLocaleString()}`;
   showModal('modal-win');
-  addLog(`🏆 MENANG! ${yakuList.join(', ')} — +${baseScore} poin!`, 'win');
+  addLog(`🏆 RON! ${yakuList.join(', ')} — +${baseScore+riichiBonus}`,'win');
+  state.gameOver=true;
+}
+
+function doChi(){
+  if(!state.canChi||state.riichi[0]) return;
+  const n=state.lastDiscard.num,s=state.lastDiscard.suit;
+  const hand=state.playerHand;
+  const nums=hand.filter(t=>t.suit===s).map(t=>t.num);
+  let set=null;
+  if(nums.includes(n-2)&&nums.includes(n-1)) set=[n-2,n-1,n];
+  else if(nums.includes(n-1)&&nums.includes(n+1)) set=[n-1,n,n+1];
+  else if(nums.includes(n+1)&&nums.includes(n+2)) set=[n,n+1,n+2];
+  if(!set) return;
+  const meld=[];
+  for(const num of set){
+    if(num===n){meld.push({...state.lastDiscard});continue;}
+    const idx=hand.findIndex(t=>t.suit===s&&t.num===num);
+    meld.push(...hand.splice(idx,1));
+  }
+  const dPile=state.discards[state.lastDiscardFrom];
+  const tIdx=dPile.map(tileKey).lastIndexOf(tileKey(state.lastDiscard));
+  if(tIdx!==-1) dPile.splice(tIdx,1);
+  state.playerMelds.push(meld);
+  state.lastDiscard=null;
+  state.canChi=state.canPon=state.canKan=state.canRon=false;
+  state.phase='discard';
+  state.ippatsu=[false,false,false,false]; // chi clears all ippatsu
+  addLog(`Kamu CHI! ${meld.map(t=>t.sym).join(' ')}`,'important');
+  if(checkWin(state.playerHand,state.playerMelds)) addLog('💡 Kamu bisa menang! Tekan TSUMO!','important');
+  updateUI();
+}
+
+function doPon(){
+  if(!state.canPon||state.riichi[0]) return;
+  const hand=state.playerHand;
+  const key=tileKey(state.lastDiscard);
+  const meld=[{...state.lastDiscard}];
+  let count=0;
+  for(let i=hand.length-1;i>=0&&count<2;i--){
+    if(tileKey(hand[i])===key){meld.push(...hand.splice(i,1));count++;}
+  }
+  const dPile=state.discards[state.lastDiscardFrom];
+  const tIdx=dPile.map(tileKey).lastIndexOf(tileKey(state.lastDiscard));
+  if(tIdx!==-1) dPile.splice(tIdx,1);
+  state.playerMelds.push(meld);
+  state.lastDiscard=null;
+  state.canChi=state.canPon=state.canKan=state.canRon=false;
+  state.phase='discard';
+  state.ippatsu=[false,false,false,false]; // pon clears all ippatsu
+  addLog(`Kamu PON! ${meld[0].sym}×3`,'important');
+  if(checkWin(state.playerHand,state.playerMelds)) addLog('💡 Kamu bisa menang!','important');
+  updateUI();
+}
+
+function doKan(){
+  if(!state.canKan||state.riichi[0]) return;
+  const hand=state.playerHand;
+  const key=tileKey(state.lastDiscard);
+  const meld=[{...state.lastDiscard}];
+  let count=0;
+  for(let i=hand.length-1;i>=0&&count<3;i--){
+    if(tileKey(hand[i])===key){meld.push(...hand.splice(i,1));count++;}
+  }
+  const dPile=state.discards[state.lastDiscardFrom];
+  const tIdx=dPile.map(tileKey).lastIndexOf(tileKey(state.lastDiscard));
+  if(tIdx!==-1) dPile.splice(tIdx,1);
+  state.playerMelds.push(meld);
+
+  // Reveal new dora indicator
+  if(state.doraPool.length>0){
+    state.doraIndicators.push(state.doraPool.shift());
+    addLog('✨ Kan Dora baru terungkap!','important');
+  }
+
+  // Rinshan tile from dead wall
+  const rinshan=state.rinshan.length>0?state.rinshan.pop():state.wall.pop();
+  if(rinshan){rinshan.isNew=true;hand.push(rinshan);}
+
+  state.lastDiscard=null;
+  state.canChi=state.canPon=state.canKan=state.canRon=false;
+  state.phase='discard';
+  state.ippatsu=[false,false,false,false];
+  addLog(`Kamu KAN! ${meld[0].sym}×4. Rinshan: ${rinshan?rinshan.sym:'(kosong)'}`,'important');
+  if(checkWin(state.playerHand,state.playerMelds)) addLog('💡 Kamu bisa menang!','important');
+  updateUI();
+}
+
+function selectTile(idx){
+  if(state.phase!=='discard'||state.turn!==0) return;
+  // After riichi: only allow selecting the drawn tile
+  if(state.riichi[0]){
+    const drawnIdx=state.playerHand.length-1;
+    state.selectedTile=idx===drawnIdx?idx:-1;
+    if(idx!==drawnIdx) addLog('Riichi aktif! Hanya bisa membuang tile yang ditarik.','error');
+  } else {
+    state.selectedTile=state.selectedTile===idx?-1:idx;
+  }
+  updateUI();
+}
+
+function declareWin(){
+  const hand=state.playerHand;
+  const melds=state.playerMelds;
+  if(!checkWin(hand,melds)) return;
+  const{han,yakuList,baseScore,riichiBonus}=calculateScore(hand,melds,'tsumo',0);
+  state.scores[0]+=baseScore+riichiBonus;
+  if(riichiBonus>0) state.riichiBets=0;
+  document.getElementById('win-score-display').textContent='+'+(baseScore+riichiBonus).toLocaleString();
+  document.getElementById('win-hands-display').textContent=yakuList.join(' · ');
+  document.getElementById('win-desc').textContent=`Han: ${han} · Skor Total: ${state.scores[0].toLocaleString()}`;
+  showModal('modal-win');
+  addLog(`🏆 TSUMO! ${yakuList.join(', ')} — +${baseScore+riichiBonus}`,'win');
+  state.gameOver=true;
 }
 
 // =============================================
-// UI
+// RENDERING
 // =============================================
-function renderTile(tile, idx, isPlayer = false) {
-  const div = document.createElement('div');
-  div.className = `tile-main ${tile.cls}${tile.isNew ? ' new-tile' : ''}${state.selectedTile === idx && isPlayer ? ' selected' : ''}`;
-  const numDiv = document.createElement('div');
-  numDiv.className = 't-num';
-  if (tile.num > 0) numDiv.textContent = tile.num;
+function renderTile(tile,idx,isPlayer=false){
+  const div=document.createElement('div');
+  let cls=`tile-main ${tile.cls}${tile.isNew?' new-tile':''}${state.selectedTile===idx&&isPlayer?' selected':''}`;
+  if(isPlayer&&state.riichi[0]&&idx!==state.playerHand.length-1) cls+=' riichi-locked';
+  div.className=cls;
+  const numDiv=document.createElement('div');
+  numDiv.className='t-num';
+  if(tile.num>0) numDiv.textContent=tile.num;
   div.appendChild(numDiv);
-  const symDiv = document.createElement('div');
-  symDiv.className = 't-sym';
-  symDiv.textContent = tile.sym;
+  const symDiv=document.createElement('div');
+  symDiv.className='t-sym';
+  symDiv.textContent=tile.sym;
   div.appendChild(symDiv);
-  if (isPlayer) div.onclick = () => selectTile(idx);
+  if(isPlayer) div.onclick=()=>selectTile(idx);
   return div;
 }
 
-function renderSmallTile(tile, isLatest = false) {
-  const div = document.createElement('div');
-  div.className = `tile-sm ${tile.cls}${isLatest ? ' latest' : ''}`;
-  div.textContent = tile.sym;
-  div.title = tile.name || tile.sym;
+function renderSmallTile(tile,isLatest=false){
+  const div=document.createElement('div');
+  div.className=`tile-sm ${tile.cls}${isLatest?' latest':''}`;
+  div.textContent=tile.sym;
+  div.title=tile.name||tile.sym;
   return div;
 }
 
-function renderMeld(meld) {
-  const div = document.createElement('div');
-  div.className = 'meld-set';
-  meld.forEach(t => div.appendChild(renderSmallTile(t)));
+function renderMeld(meld){
+  const div=document.createElement('div');
+  div.className='meld-set';
+  meld.forEach(t=>div.appendChild(renderSmallTile(t)));
   return div;
 }
 
-function updateUI() {
-  // Tangan player
-  const handEl = document.getElementById('hand-player');
-  handEl.innerHTML = '';
-  state.playerHand.forEach((t, i) => handEl.appendChild(renderTile(t, i, true)));
+function renderDoraIndicators(){
+  const el=document.getElementById('dora-indicators');
+  el.innerHTML='';
+  for(const ind of state.doraIndicators){
+    const div=document.createElement('div');
+    div.className=`dora-tile-mini ${ind.cls}`;
+    div.textContent=ind.sym;
+    div.title='Indikator Dora (tile berikutnya = Dora)';
+    el.appendChild(div);
+    // Show actual dora
+    const dora=doraFromIndicator(ind);
+    const arrow=document.createElement('span');
+    arrow.style.cssText='color:var(--gold);font-size:0.7rem;align-self:center;';
+    arrow.textContent='→';
+    el.appendChild(arrow);
+    const doraDiv=document.createElement('div');
+    doraDiv.className=`dora-tile-mini ${dora.cls}`;
+    doraDiv.style.cssText='border-color:#27ae60;box-shadow:0 0 8px rgba(39,174,96,0.5);';
+    doraDiv.textContent=dora.sym;
+    doraDiv.title='DORA (+1 Han per tile ini)';
+    el.appendChild(doraDiv);
+  }
+}
 
-  // Meld player
-  const meldEl = document.getElementById('meld-player');
-  meldEl.innerHTML = '';
-  state.playerMelds.forEach(m => meldEl.appendChild(renderMeld(m)));
+function renderSideOppTiles(containerId,count,isRiichi){
+  const el=document.getElementById(containerId);
+  el.innerHTML='';
+  for(let i=0;i<count;i++){
+    const t=document.createElement('div');
+    if(isRiichi&&i===0){
+      t.className='tile-back-side';
+      t.style.cssText='width:18px;height:26px;border-color:#e74c3c;transform:rotate(90deg);';
+    } else {
+      t.className='tile-back-side';
+    }
+    el.appendChild(t);
+  }
+}
 
-  // Lawan
-  ['top'].forEach((pos, oi) => {
-    const opIdx = 1; // hanya 1 lawan ditampilkan di atas
-    const handOpEl = document.getElementById(`hand-${pos}`);
-    handOpEl.innerHTML = '';
-    state.opponentHands[opIdx].forEach(() => {
-      const back = document.createElement('div');
-      back.className = 'tile-back';
-      back.textContent = '🀫';
-      handOpEl.appendChild(back);
+function renderSideMelds(containerId,melds){
+  const el=document.getElementById(containerId);
+  el.innerHTML='';
+  melds.forEach(meld=>{
+    const ms=document.createElement('div');
+    ms.className='side-meld-set';
+    meld.forEach(t=>{
+      const ts=document.createElement('div');
+      ts.className=`tile-sm ${t.cls}`;
+      ts.style.cssText='width:20px;height:26px;font-size:0.6rem;';
+      ts.textContent=t.sym;
+      ms.appendChild(ts);
     });
-    const meldOpEl = document.getElementById(`meld-${pos}`);
-    meldOpEl.innerHTML = '';
-    state.opponentMelds[opIdx].forEach(m => meldOpEl.appendChild(renderMeld(m)));
+    el.appendChild(ms);
+  });
+}
+
+function updateTenpaiDisplay(){
+  const bar=document.getElementById('tenpai-bar');
+  const tilesEl=document.getElementById('tenpai-tiles');
+  tilesEl.innerHTML='';
+
+  // Show tenpai display when: player has 13 tiles after discarding, or in draw phase
+  const hand=state.playerHand;
+  const melds=state.playerMelds;
+
+  // Check if current hand is tenpai (13 tiles)
+  const meldTiles=melds.reduce((s,m)=>s+(m.length===4?3:m.length),0);
+  const effective=hand.length+meldTiles;
+
+  if(effective===13&&!state.gameOver){
+    const waitTiles=getWinningTiles(hand,melds);
+    if(waitTiles.length>0){
+      bar.classList.add('show');
+      waitTiles.forEach(t=>{
+        const div=document.createElement('div');
+        div.className=`wait-tile ${t.cls}`;
+        div.textContent=t.sym;
+        div.title=t.name||t.sym;
+        tilesEl.appendChild(div);
+      });
+      return;
+    }
+  }
+  bar.classList.remove('show');
+}
+
+function updateUI(){
+  // Player hand
+  const handEl=document.getElementById('hand-player');
+  handEl.innerHTML='';
+  state.playerHand.forEach((t,i)=>handEl.appendChild(renderTile(t,i,true)));
+
+  // Player melds
+  const meldEl=document.getElementById('meld-player');
+  meldEl.innerHTML='';
+  state.playerMelds.forEach(m=>meldEl.appendChild(renderMeld(m)));
+
+  // TOP opponent tiles (face down)
+  const handTopEl=document.getElementById('hand-top');
+  handTopEl.innerHTML='';
+  state.opponentHands[1].forEach((_,i)=>{
+    const b=document.createElement('div');
+    if(state.riichi[2]&&i===0){
+      b.className='tile-back riichi-tile';
+    } else {
+      b.className='tile-back';
+      b.textContent='🀫';
+    }
+    handTopEl.appendChild(b);
+  });
+  const meldTopEl=document.getElementById('meld-top');
+  meldTopEl.innerHTML='';
+  state.opponentMelds[1].forEach(m=>meldTopEl.appendChild(renderMeld(m)));
+
+  // LEFT opponent
+  renderSideOppTiles('hand-left',state.opponentHands[0].length,state.riichi[1]);
+  renderSideMelds('meld-left',state.opponentMelds[0]);
+
+  // RIGHT opponent
+  renderSideOppTiles('hand-right',state.opponentHands[2].length,state.riichi[3]);
+  renderSideMelds('meld-right',state.opponentMelds[2]);
+
+  // Discards
+  ['player','left','top','right'].forEach((pos,i)=>{
+    const el=document.getElementById(`discard-${pos}`);
+    el.innerHTML='';
+    state.discards[i].forEach((t,ti)=>{
+      el.appendChild(renderSmallTile(t,ti===state.discards[i].length-1));
+    });
   });
 
-  // Buangan
-  ['player','left','top','right'].forEach((pos, i) => {
-    const el = document.getElementById(`discard-${pos}`);
-    el.innerHTML = '';
-    state.discards[i].forEach((t, ti) => {
-      el.appendChild(renderSmallTile(t, ti === state.discards[i].length - 1));
-    });
-  });
+  // Scores
+  document.getElementById('info-wall').textContent=state.wall.length;
+  document.getElementById('wall-display').textContent=state.wall.length;
+  document.getElementById('info-score').textContent=state.scores[0].toLocaleString();
+  document.getElementById('score-player').textContent=state.scores[0].toLocaleString();
+  document.getElementById('score-top').textContent=state.scores[2].toLocaleString();
+  document.getElementById('score-left').textContent=state.scores[1].toLocaleString();
+  document.getElementById('score-right').textContent=state.scores[3].toLocaleString();
+  document.getElementById('info-turn').textContent=state.turn===0?'Kamu':'Lawan';
 
-  // Info
-  document.getElementById('info-wall').textContent = state.wall.length;
-  document.getElementById('wall-display').textContent = state.wall.length;
-  document.getElementById('info-score').textContent = state.scores[0].toLocaleString();
-  document.getElementById('score-player').textContent = state.scores[0].toLocaleString();
-  document.getElementById('score-top').textContent = state.scores[1].toLocaleString();
-  document.getElementById('info-turn').textContent = state.turn === 0 ? 'Kamu' : 'Lawan';
-  document.getElementById('drawn-display').textContent = state.drawnTile ? `Tile baru: ${state.drawnTile.sym}` : 'Belum ambil tile';
+  // Drawn info
+  document.getElementById('drawn-display').textContent=state.drawnTile?`Tile: ${state.drawnTile.sym}`:'Giliran kamu';
+
+  // Riichi badges
+  document.getElementById('riichi-player-badge').style.display=state.riichi[0]?'inline':'none';
+  document.getElementById('riichi-top-badge').style.display=state.riichi[2]?'inline':'none';
+  document.getElementById('riichi-left-badge').style.display=state.riichi[1]?'flex':'none';
+  document.getElementById('riichi-right-badge').style.display=state.riichi[3]?'flex':'none';
+
+  // Riichi sticks on table
+  const riichiArea=document.getElementById('riichi-sticks-area');
+  if(state.riichiBets>0){
+    riichiArea.style.display='flex';
+    document.getElementById('riichi-bet-count').textContent=state.riichiBets;
+    const sticksVis=document.getElementById('riichi-sticks-visual');
+    sticksVis.innerHTML='';
+    for(let i=0;i<Math.min(state.riichiBets,4);i++){
+      const s=document.createElement('div');
+      s.className='riichi-stick';
+      sticksVis.appendChild(s);
+    }
+  } else {
+    riichiArea.style.display='none';
+  }
+
+  // Dora indicators
+  renderDoraIndicators();
 
   // Buttons
-  const inDraw = state.phase === 'draw' && state.turn === 0;
-  const inDiscard = state.phase === 'discard' && state.turn === 0;
-  document.getElementById('btn-draw').disabled = !inDraw || state.wall.length === 0;
-  document.getElementById('btn-discard').disabled = !inDiscard || state.selectedTile < 0;
-  document.getElementById('btn-chi').disabled = !state.canChi;
-  document.getElementById('btn-pon').disabled = !state.canPon;
-  document.getElementById('btn-kan').disabled = !state.canKan;
-  // Cek menang
-  const canWin = checkWin(state.playerHand, state.playerMelds);
-  document.getElementById('btn-win').disabled = !canWin;
+  const inDraw=state.phase==='draw'&&state.turn===0;
+  const inDiscard=state.phase==='discard'&&state.turn===0;
+  document.getElementById('btn-draw').disabled=!inDraw||state.wall.length===0;
+  document.getElementById('btn-discard').disabled=!inDiscard||state.selectedTile<0;
+  document.getElementById('btn-chi').disabled=!state.canChi||state.riichi[0];
+  document.getElementById('btn-pon').disabled=!state.canPon||state.riichi[0];
+  document.getElementById('btn-kan').disabled=!state.canKan||state.riichi[0];
+
+  const canRiichi=canDeclareRiichi()&&state.selectedTile>=0;
+  document.getElementById('btn-riichi').disabled=!canRiichi;
+  document.getElementById('btn-riichi').style.display=(!state.riichi[0]&&state.playerMelds.length===0)?'inline-block':'none';
+
+  const ronBtn=document.getElementById('btn-ron');
+  if(ronBtn) ronBtn.disabled=!state.canRon;
+
+  const canWin=checkWin(state.playerHand,state.playerMelds);
+  document.getElementById('btn-win').disabled=!canWin;
+
+  // Tenpai display
+  updateTenpaiDisplay();
 }
 
-function addLog(msg, cls = '') {
-  const log = document.getElementById('game-log');
-  const entry = document.createElement('div');
-  entry.className = `log-entry ${cls}`;
-  entry.textContent = msg;
-  log.insertBefore(entry, log.firstChild);
-  if (log.children.length > 20) log.removeChild(log.lastChild);
+function addLog(msg,cls=''){
+  const log=document.getElementById('game-log');
+  const entry=document.createElement('div');
+  entry.className=`log-entry ${cls}`;
+  entry.textContent=msg;
+  log.insertBefore(entry,log.firstChild);
+  if(log.children.length>30) log.removeChild(log.lastChild);
 }
 
-function showFloatNotif(msg, duration = 2000) {
-  const el = document.getElementById('floatNotif');
-  el.textContent = msg;
-  el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', duration);
+function showFloatNotif(msg,duration=2000){
+  const el=document.getElementById('floatNotif');
+  el.textContent=msg;el.style.display='block';
+  setTimeout(()=>el.style.display='none',duration);
 }
 
 // =============================================
-// SCREEN & MODAL MANAGEMENT
+// SCREEN & MODAL
 // =============================================
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => {
-    s.classList.remove('active');
-    s.style.display = '';
-  });
-  const el = document.getElementById('screen-' + name);
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.display='';});
+  const el=document.getElementById('screen-'+name);
   el.classList.add('active');
-  if (name === 'game') el.style.display = 'flex';
-  else if (name === 'title') el.style.display = 'flex';
-  else el.style.display = 'block';
+  if(name==='game') el.style.display='flex';
+  else if(name==='title') el.style.display='flex';
+  else el.style.display='block';
 }
 
-function showModal(id) {
-  document.getElementById(id).classList.add('active');
+function showModal(id){document.getElementById(id).classList.add('active');}
+function closeModal(id){document.getElementById(id).classList.remove('active');}
+
+function showTutTab(tab){
+  document.querySelectorAll('.tut-content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tut-tab').forEach(t=>t.classList.remove('active'));
+  const content=document.getElementById('tut-'+tab);
+  if(content) content.classList.add('active');
+  const tabEl=document.querySelector(`.tut-tab[data-tab="${tab}"]`);
+  if(tabEl) tabEl.classList.add('active');
 }
 
-function closeModal(id) {
-  document.getElementById(id).classList.remove('active');
-}
-
-function showTutTab(tab) {
-  document.querySelectorAll('.tut-content').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('.tut-tab').forEach(t => t.classList.remove('active'));
-  const content = document.getElementById('tut-' + tab);
-  if (content) content.classList.add('active');
-  const tabEl = document.querySelector(`.tut-tab[data-tab="${tab}"]`);
-  if (tabEl) tabEl.classList.add('active');
-}
-
-// Init — semua event listener dipasang di sini (tidak ada inline onclick)
-document.addEventListener('DOMContentLoaded', () => {
+// =============================================
+// INIT
+// =============================================
+document.addEventListener('DOMContentLoaded',()=>{
   showScreen('title');
 
-  // Title screen
-  document.getElementById('btn-start-game').addEventListener('click', () => {
-    showScreen('game'); startGame();
+  document.getElementById('btn-start-game').addEventListener('click',()=>{showScreen('game');startGame();});
+  document.getElementById('btn-go-tutorial').addEventListener('click',()=>showScreen('tutorial'));
+  document.getElementById('btn-tut-play').addEventListener('click',()=>{showScreen('game');startGame();});
+  document.getElementById('btn-tut-home').addEventListener('click',()=>showScreen('title'));
+  document.querySelectorAll('.tut-tab[data-tab]').forEach(tab=>{
+    tab.addEventListener('click',()=>showTutTab(tab.dataset.tab));
   });
-  document.getElementById('btn-go-tutorial').addEventListener('click', () => {
-    showScreen('tutorial');
-  });
-
-  // Tutorial buttons
-  document.getElementById('btn-tut-play').addEventListener('click', () => {
-    showScreen('game'); startGame();
-  });
-  document.getElementById('btn-tut-home').addEventListener('click', () => {
-    showScreen('title');
-  });
-
-  // Tutorial tabs
-  document.querySelectorAll('.tut-tab[data-tab]').forEach(tab => {
-    tab.addEventListener('click', () => showTutTab(tab.dataset.tab));
-  });
-
-  // Game header buttons
-  document.getElementById('btn-game-tutorial').addEventListener('click', () => showScreen('tutorial'));
-  document.getElementById('btn-game-home').addEventListener('click', () => showScreen('title'));
-
-  // Action buttons
-  document.getElementById('btn-draw').addEventListener('click', drawTile);
-  document.getElementById('btn-discard').addEventListener('click', discardSelected);
-  document.getElementById('btn-chi').addEventListener('click', doChi);
-  document.getElementById('btn-pon').addEventListener('click', doPon);
-  document.getElementById('btn-kan').addEventListener('click', doKan);
-  document.getElementById('btn-win').addEventListener('click', declareWin);
-
-  // Modal buttons
-  document.getElementById('btn-win-newround').addEventListener('click', () => {
-    startGame(); closeModal('modal-win');
-  });
-  document.getElementById('btn-win-menu').addEventListener('click', () => {
-    showScreen('title'); closeModal('modal-win');
-  });
-  document.getElementById('btn-draw-newround').addEventListener('click', () => {
-    startGame(); closeModal('modal-draw');
-  });
-  document.getElementById('btn-draw-menu').addEventListener('click', () => {
-    showScreen('title'); closeModal('modal-draw');
-  });
+  document.getElementById('btn-game-tutorial').addEventListener('click',()=>showScreen('tutorial'));
+  document.getElementById('btn-game-home').addEventListener('click',()=>showScreen('title'));
+  document.getElementById('btn-draw').addEventListener('click',drawTile);
+  document.getElementById('btn-discard').addEventListener('click',discardSelected);
+  document.getElementById('btn-chi').addEventListener('click',doChi);
+  document.getElementById('btn-pon').addEventListener('click',doPon);
+  document.getElementById('btn-kan').addEventListener('click',doKan);
+  document.getElementById('btn-riichi').addEventListener('click',doRiichi);
+  document.getElementById('btn-win').addEventListener('click',declareWin);
+  const ronBtn=document.getElementById('btn-ron');
+  if(ronBtn) ronBtn.addEventListener('click',doRon);
+  document.getElementById('btn-win-newround').addEventListener('click',()=>{startGame();closeModal('modal-win');});
+  document.getElementById('btn-win-menu').addEventListener('click',()=>{showScreen('title');closeModal('modal-win');});
+  document.getElementById('btn-draw-newround').addEventListener('click',()=>{startGame();closeModal('modal-draw');});
+  document.getElementById('btn-draw-menu').addEventListener('click',()=>{showScreen('title');closeModal('modal-draw');});
 });
 </script>
 </body>
